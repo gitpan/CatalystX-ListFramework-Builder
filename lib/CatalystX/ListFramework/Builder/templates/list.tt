@@ -1,0 +1,24 @@
+<script type="text/javascript">
+
+Ext.onReady(function(){
+
+    // create the Data Store
+    [% PROCESS javascript/store.tt %]
+
+    // set up the list grid
+    [% PROCESS javascript/grid.tt %]
+
+    // render it
+    grid.render();
+
+    // trigger the data store load
+    // NB start is needed by store, but not by backend
+    store.load({params:{start:0, limit:10, page:1}});
+
+});
+
+</script>
+
+[% PROCESS style.tt %]
+
+<div id="list-grid"></div>

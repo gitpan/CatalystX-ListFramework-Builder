@@ -1,0 +1,27 @@
+FEATURE
+ - Externally loaded Helpers
+ - more Helpers - start with Boolean
+
+CODE
+ - Look at DBIC Cascade settings
+ - Use Symbol::qualify_to_ref where appropriate
+ - Refactor the Core package
+
+DONE
+ - More documentation
+ - Icon for delete column
+ - Refactor create/update code
+ - Reset button for Search form
+ - JS/CSS mouseover rows in table
+ - Migrate to ExtJS 2.1
+ - Create row without pre-insert
+ - Nuke undef warnings in logs
+ - File::Slurp::read_file needs error param (or confess)
+ - Column sort order
+ - Auto generate Master/Site
+ - Catalyst Component base class
+ - Make TT files use configurable URL paths (e.g. css)
+
+WONTFIX
+ - Multi column PKs (via path parts?)/Col 'id' assumed as PK (path parts?)
+

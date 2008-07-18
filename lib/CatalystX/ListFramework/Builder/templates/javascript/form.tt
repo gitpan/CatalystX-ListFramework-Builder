@@ -1,0 +1,146 @@
+    // turn on validation errors beside the field globally
+    Ext.QuickTips.init();
+    Ext.form.Field.prototype.msgTarget = 'side';
+
+    var tabs = [
+      [% FOREACH tname IN formdef.infobox_order.nsort -%]
+        {
+            [% IF formdef.infobox_order.$tname == 1 -%]
+              title: '[% tname FILTER ucfirst %]'
+            [% ELSE -%]
+              title: 'New [% tname FILTER ucfirst %]'
+              ,xtype: 'fieldset'
+              ,checkboxToggle: true
+              ,checkboxName: 'checkbox.[% tname %]'
+              ,collapsed: true
+            [% END -%]
+
+            ,items: [
+              [% FOREACH field IN formdef.infoboxes.$tname %]
+                {
+                    name: '[% field.id %]'
+                    ,id: '[% field.id %]'
+                    ,fieldLabel: '[% field.heading %]'
+                    ,anchor: '-20'
+                    ,autoHeight: true
+                  [% IF field.not_editable %]
+                    ,readOnly: true
+                    ,cls: 'x-item-disabled'
+                    //,disabled: true // argh, prevents submit :-( so use cls
+                  [% ELSIF field.required %]
+                    ,allowBlank: false
+                  [% END %]
+                  [% IF field.id.search('\@OBJECT$') %]
+                    [% SET fkname = field.id.replace('\@OBJECT','') %]
+                    ,xtype: 'combo'
+                    ,displayField: 'stringified'
+                    ,valueField: 'dbid'
+                    ,hiddenName: 'combobox.[% field.id %]'
+                    ,loadingText: 'Searching...'
+                    ,forceSelection: true
+                    ,selectOnFocus: true
+                    ,typeAhead: false
+                    ,pageSize: 5
+                    ,triggerAction: 'all'
+                    ,store: new Ext.data.JsonStore({
+                        url: '[% c.req.base %]jget_stringified/[% tname %]'
+                        ,root: 'rows' ,totalProperty: 'total'
+                        ,fields: [ 'dbid', 'stringified' ]
+                        ,listeners: {
+                            beforeload: function(store, options) {
+                                var start = options.params.start;
+                                var limit = options.params.limit;
+                                options.params.page = Math.floor(start / limit) + 1;
+                                options.params.fkname = '[% fkname %]';
+                                return true;
+                            }
+                        }
+                    })
+                  [% END %]
+                },
+              [% END %]
+            ]
+        },
+      [% END -%]
+    ];
+
+    var generate_win = function() {
+        return new Ext.Window({
+            title: 'Edit [% formdef.title %]'
+            ,id: 'main-win'
+            ,collapsible: true
+            ,closable: true
+            ,width: 400
+            ,modal: true
+            ,autoHeight: true
+            ,layout: 'fit'
+    
+            // form
+            ,items: [{
+                xtype: 'form'
+                ,id: 'form-panel'
+                ,border: false
+                ,url: '[% c.req.base %]jupdate/[% name %]'
+                ,autoHeight: true
+                ,layout: 'fit'
+    
+                // tabpanel
+                ,items: [{
+                    xtype: 'tabpanel'
+                    ,activeTab: 0
+                    ,border: false
+                    ,deferredRender: false // submit all tabs
+                    ,autoHeight: true
+    
+                    // tab defaults
+                    ,defaults: {
+                        layout: 'form'
+                        ,bodyStyle: 'padding:5px'
+                        ,defaultType: 'textfield'
+                        ,labelWidth: 100
+                        ,buttonAlign: 'right'
+                        ,hideMode: 'offsets'
+                        ,autoHeight: true
+                        ,hideMode: 'offsets'
+                    }
+    
+                    ,items: tabs
+                }]
+    
+                ,buttons: [{
+                    text: 'Save'
+                    ,handler: function(){
+                        Ext.getCmp('form-panel').getForm().submit({
+                            waitMsg: 'Saving Data...'
+                            ,clientValidation: false
+    
+                            ,success: function(){
+                                Ext.Msg.alert(
+                                    'Success', 'Changes have been saved.',
+                                    refreshandclose
+                                );
+                            }
+    
+                            ,failure: function(){
+                                Ext.Msg.alert(
+                                    'Error', 'Changes have not been saved!');
+                            }
+                        });
+                    }
+                },{
+                    text: 'Cancel',
+                    handler: function(){
+                        Ext.getCmp('main-win').close();
+                    }
+                }]
+            }]
+        });
+    }
+
+    var refreshandclose = function(btn,text){
+        if (btn == 'ok') {
+            // XXX using private parts of PagingToolbar
+            pagebar.doLoad( pagebar.cursor ); // reload
+            Ext.getCmp('main-win').close();
+        }
+    };

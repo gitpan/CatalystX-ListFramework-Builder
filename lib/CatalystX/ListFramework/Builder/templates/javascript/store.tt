@@ -1,0 +1,65 @@
+    // create a data record
+    var rowRecord = Ext.data.Record.create([
+      [% FOREACH col IN formdef.display.default -%]
+        { name: '[% col.id %]' },
+      [% END -%]
+    ]);
+
+    // create the Data Store
+    var store = new Ext.data.JsonStore({
+        url: '[% c.req.base %]jlist/[% name %]',
+        root: 'rows',
+        fields: rowRecord,
+        remoteSort: true,
+        totalProperty: 'total',
+    });
+
+    // set default sort if we can
+    store.setDefaultSort('[% formdef.columns.OBJECT.primary_key %]', 'ASC');
+
+    // hook to add page num param
+    // got this from the extjs forums
+    store.on('beforeload', function(store, options) {
+        var start = options.params.start;
+        var limit = options.params.limit;
+        options.params.page = Math.floor(start / limit) + 1;
+        return true;
+    });
+
+
+    // toolkit stuff for checking for foreign keys
+    var isFK_re = /@OBJECT$/;
+    function isFK (s) {
+        return String(s).search (isFK_re) != -1;
+    }
+
+    // insert row for adding search filters
+    // need to fiddle the pager so it doesn't know about the extra row
+    store.on('load', function(store, records, options) {
+        // XXX uses private data to fiddle the page length
+        var numrecs = pagebar.store.data.length;
+        pagebar.disable();
+
+        // build search row based on previous search strings or defaults
+        var searchrow = {};
+        var params = store.baseParams;
+        var cols = cm.getColumnsBy(function (){ return true; });
+        for (var id in cols) {
+            var name = cols[id].dataIndex;
+            if (isFK(name)) {
+                searchrow[name] = 'click to view ' + cols[id].header + ' table';
+                continue;
+            }
+            if (params['search.' + name]) {
+                searchrow[name] = params['search.' + name];
+                continue;
+            }
+            searchrow[name] = '(click to add filter)';
+        }
+
+        store.insert(0, new rowRecord( searchrow ));
+
+        pagebar.store.data.length = numrecs;
+        pagebar.updateInfo();
+        pagebar.enable();
+    });

@@ -1,0 +1,8 @@
+<body class="xtheme-gray" >
+<!-- TEMPLATE OK -->
+<div id="container"><div id="content" class="list">
+
+[% INCLUDE list.tt %]
+
+</div></div>
+</body>

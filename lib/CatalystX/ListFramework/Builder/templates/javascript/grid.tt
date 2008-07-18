@@ -1,0 +1,195 @@
+    [% PROCESS javascript/form.tt %]
+
+    // the column model has information about grid columns
+    // dataIndex maps the column to the specific data field in
+    // the data store
+    var cm = new Ext.grid.ColumnModel([
+      [% FOREACH col IN formdef.display.default -%]
+        {
+            header:     '[% col.heading %]'
+            ,dataIndex:  '[% col.id %]'
+            ,editor:     new Ext.form.TextField({})
+        },
+      [% END -%]
+        {
+            header: 'Delete'
+            ,dataIndex: 'lf-delete-column'
+            ,align: 'center'
+            ,renderer: function (value,metadata,record,rowindex,colindex,store) {
+                if (value == '(click to add filter)') {
+                    return '';
+                }
+                else {
+                    return '<img src="[% c.req.base %]/image/bin_closed.png"/>'
+                        + ' Delete [% formdef.title %]';
+                }
+            }
+        }
+    ]);
+
+    // by default columns are sortable
+    cm.defaultSortable = true;
+
+    var pagebar = new Ext.PagingToolbar({
+        id: 'pagebar'
+        ,pageSize: 10
+        ,store: store
+        ,displayInfo: true
+        ,items:[
+            '-' ,{
+                text: 'Clear Filters'
+                ,cls: 'x-btn-text-icon'
+                ,icon: '[% c.req.base %]image/bin_closed.png'
+                // XXX private method to refresh
+                ,handler: function (){
+                    store.baseParams = {}; // clear search opts
+                    pagebar.doLoad(pagebar.cursor);
+                }
+            }
+            ,' ',{
+                text: 'Apply Filters'
+                ,cls: 'x-btn-text-icon'
+                ,icon: '[% c.req.base %]/image/find.png'
+                ,handler: function (){
+                    var params = {};
+                    var searchrow = grid.getStore().getAt(0).data;
+                    for (var key in searchrow) {
+                        if ((searchrow[key].search('click to ') != -1)
+                            || (searchrow[key] == '')) {
+                            // don't submit if still the default, or empty
+                            continue;
+                        }
+                        params['search.' + key] = searchrow[key];
+                    }
+                    store.baseParams = params;
+                    pagebar.doLoad(pagebar.cursor);
+                }
+            }
+            ,'-' ,{
+                text: 'Add New [% formdef.title %]'
+                ,cls: 'x-btn-text-icon'
+                ,icon: '[% c.req.base %]/image/add.png'
+                ,handler: function(){
+                    // draw the window!
+                    var win = generate_win();
+                    win.show(this);
+                }
+            }
+        ]
+    });
+
+    var grid = new Ext.grid.EditorGridPanel({
+        id: 'search-grid'
+        ,el: 'list-grid'
+        // ,width: 900
+        ,autoHeight: true
+        ,stripeRows: true
+        ,title: '[% formdef.title %] List'
+        ,store: store
+        ,loadMask: true
+        ,colModel: cm
+        ,trackMouseOver: true
+        ,disableSelection: true
+        ,listeners: {
+            cellclick: function(g, row, col) {
+                var rec = g.getStore().getAt(row);
+                var fieldName = g.getColumnModel().getDataIndex(col);
+                // var data = rec.get(fieldName);
+
+                // reset the grid selectionModel
+                g.getSelectionModel().deselectRow(row);
+
+                if (fieldName == 'lf-delete-column') {
+                    if (row == 0) {
+                        // edit row is ignored
+                        return false;
+                    }
+
+                    var data = rec.get('[% formdef.columns.OBJECT.primary_key %]');
+                    Ext.MessageBox.confirm (
+                        'Confirm Delete [% formdef.title %]'
+                        ,'Are you sure you want to delete [% formdef.title %] "' + data + '" ?'
+                        ,function (btn) {
+                            if (btn == 'yes') {
+                                Ext.Ajax.request({
+                                    url: '[% c.req.base %]jdelete/[% formdef.infobox_order.nsort.first %]'
+                                    ,params: {
+                                        key: data
+                                    }
+                                    ,success: function(response,options) {
+                                        Ext.MessageBox.alert(
+                                            'Success'
+                                            ,'Entry successfully deleted.'
+                                            ,function() {
+                                                // XXX private parts of pagingtoolbar
+                                                pagebar.doLoad(pagebar.cursor);
+                                            }
+                                        );
+                                    }
+                                    ,failure: function(response,options) {
+                                        Ext.MessageBox.alert(
+                                            'Problem deleting entry'
+                                            ,'Sorry, the entry could not be deleted. '
+                                                + 'Is its primary key referenced in another table?'
+                                        );
+                                    }
+                                });
+                            }
+                        }
+                    );
+
+                    return false;
+                }
+
+                if (row == 0) {
+                    if (isFK(fieldName)) {
+                        // FK is hyperlink to its table
+                        var usesTable = new Array();
+                        [% FOREACH ref IN formdef.uses %]
+                            usesTable['[% ref.key %]'] = '[% ref.value %]';
+                        [% END %]
+                        window.location =
+                            '[% c.req.uri.replace(formdef.infobox_order.nsort.first, '') %]'
+                                + usesTable[fieldName.replace(/\@OBJECT/,'')];
+                        return false;
+                    }
+
+                    g.stopEditing;
+                    rec.set(fieldName, '');
+                    g.startEditing(row,col);
+                }
+                else {
+                    // draw the window!
+                    var win = generate_win();
+                    win.show(this);
+
+                    // handle for the form
+                    var maintable = Ext.getCmp('form-panel');
+
+                    // import data from grid row
+                    maintable.getForm().loadRecord(rec);
+                }
+            }
+            ,beforeedit: function(e) {
+                // cancel ENTER key driven edits from the filter row
+                // also cancel on the filter row itself if a FK
+                if ((e.row != 0) || isFK(e.field)) { return false }
+            }
+            ,columnmove: function(oldidx, newidx) {
+                // XXX private parts of pagingtoolbar
+                pagebar.doLoad(pagebar.cursor);
+            }
+        }
+        ,selModel: new Ext.grid.RowSelectionModel // req'd to deselect row
+        ,bbar: pagebar
+        ,viewConfig: new Ext.grid.GridView({
+            autoFill: true
+            ,fiorceFit: true
+            ,scrollOffset: 0
+            ,getRowClass: function (record, index) {
+                if (pagebar.disabled == true && index == 0) {
+                    return 'half-grey';
+                }
+            }
+        })
+    });
