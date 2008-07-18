@@ -215,8 +215,9 @@ sub rowobject_to_columns {
                 my $tmp;
                 eval "\$tmp = \$row_in_wanted_table->$2";
                 if ($@) { die "Eval of row->$2 failed"; }
-                eval "\$cell .= \&CatalystX::ListFramework::Helpers::$1(\$tmp, \$self->{c}, \$self->{formdef})";
-                confess "Helper call failed: $@" if ($@);
+                #eval "\$cell .= \&CatalystX::ListFramework::Helpers::$1(\$tmp, \$self->{c}, \$self->{formdef})";
+                #confess "Helper call failed: $@" if ($@);
+                $cell = $tmp; # no-op the helper, for now
             }
             else { # a simple column name. NB: field can't have dots any more - that's what id is for
                 if ($#fields == 0) {
@@ -228,8 +229,9 @@ sub rowobject_to_columns {
                 }
                 die "Setting cell failed: $@" if ($@);
                 if (defined $col->{type}) {
-                    eval "\$cell = \&CatalystX::ListFramework::Helpers::Types::$col->{type}(\$cell, \$self->{c}, \$self->{formdef})";
-                    confess "Type-helper call failed: $@" if ($@);
+                    #eval "\$cell = \&CatalystX::ListFramework::Helpers::Types::$col->{type}(\$cell, \$self->{c}, \$self->{formdef})";
+                    #confess "Type-helper call failed: $@" if ($@);
+                    $cell = $cell; # no-op the helper, for now
                 }
             }
         }

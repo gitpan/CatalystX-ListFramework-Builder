@@ -23,5 +23,4 @@ lib/CatalystX/ListFramework/Builder/templates/list.tt
 lib/CatalystX/ListFramework/Builder/Controller/Root.pm
 lib/CatalystX/ListFramework/Core.pm
 lib/CatalystX/ListFramework/Util.pm
-lib/CatalystX/ListFramework/Helpers.pm
 lib/CatalystX/ListFramework/Builder.pm

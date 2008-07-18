@@ -1,3 +1,9 @@
+CatalystX::ListFramework::Builder (0.06) UNRELEASED; urgency=low
+
+  * Removed Helpers which was a hang-over from the other ListFramework.
+
+ -- Oliver Gorwits <oliver.gorwits@oucs.ox.ac.uk>  Fri, 18 Jul 2008 23:41:00 +0100
+
 CatalystX::ListFramework::Builder (0.05) UNRELEASED; urgency=low
 
   * Initial release on an unsuspecting world.
