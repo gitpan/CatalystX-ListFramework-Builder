@@ -3,8 +3,6 @@ package CatalystX::ListFramework::Builder::Base;
 use strict;
 use warnings FATAL => 'all';
 
-use CatalystX::ListFramework::Core;
-
 use Catalyst::Runtime '5.70';
 use Class::C3;
 

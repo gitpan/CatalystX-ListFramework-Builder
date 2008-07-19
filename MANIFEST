@@ -21,6 +21,5 @@ lib/CatalystX/ListFramework/Builder/templates/style.tt
 lib/CatalystX/ListFramework/Builder/templates/list-and-search.tt
 lib/CatalystX/ListFramework/Builder/templates/list.tt
 lib/CatalystX/ListFramework/Builder/Controller/Root.pm
-lib/CatalystX/ListFramework/Core.pm
-lib/CatalystX/ListFramework/Util.pm
+lib/CatalystX/ListFramework/Builder/Core.pm
 lib/CatalystX/ListFramework/Builder.pm

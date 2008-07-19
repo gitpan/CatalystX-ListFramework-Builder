@@ -5,7 +5,6 @@ FEATURE
 CODE
  - Look at DBIC Cascade settings
  - Use Symbol::qualify_to_ref where appropriate
- - Refactor the Core package
 
 DONE
  - More documentation

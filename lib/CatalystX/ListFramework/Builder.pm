@@ -3,7 +3,7 @@ package CatalystX::ListFramework::Builder;
 use strict;
 use warnings FATAL => 'all';
 
-our $VERSION = 0.06;
+our $VERSION = 0.07;
 
 sub build_listframework {
     my ($class, $config) = @_;
@@ -58,20 +58,13 @@ CatalystX::ListFramework::Builder - Instant AJAX web front-end for DBIx::Class, 
 
 =head1 VERSION
 
-This document refers to version 0.06 of CatalystX::ListFramework::Builder
+This document refers to version 0.07 of CatalystX::ListFramework::Builder
 
 =head1 WARNING
 
 This is an I<ALPHA RELEASE>. I'd really appreciate any bug reports; you can
 use the CPAN RT bug tracking system, or email me (Oliver) directly at the
 address at the bottom of this page.
-
-=head1 ACKNOWLEDGEMENTS
-
-Without the initial work on C<CatalystX::ListFramework> by Andrew Payne and
-Peter Edwards this package would not exist. If you are looking for something
-like this module but without the dependency on Javascript, please do check
-out L<CatalystX::ListFramework>.
 
 =head1 PURPOSE
 
@@ -81,6 +74,13 @@ with little effort.
 
 This module, with only a few lines of configuration, is able to create such
 interfaces on the fly. They are a bit whizzy and all Web 2.0-ish.
+
+=head1 ACKNOWLEDGEMENTS
+
+Without the initial work on C<CatalystX::ListFramework> by Andrew Payne and
+Peter Edwards this package would not exist. If you are looking for something
+like this module but without the dependency on Javascript, please do check
+out L<CatalystX::ListFramework>.
 
 =head1 SYNOPSIS
 
@@ -265,15 +265,27 @@ List::MoreUtils
 
 =back
 
-=head1 AUTHORS
+=head1 SEE ALSO
+
+L<CatalystX::ListFramework> is similar but has no dependency on Javascript
+(though it can use it for fancy auto-complete searches), and it also allows
+you to control which columns are rendered in the display.
+
+=over 4
+
+=item *
+
+L<http://dev.catalyst.perl.org/new-wiki/crud>
+
+=back
+
+=head1 AUTHOR
 
 Oliver Gorwits C<< <oliver.gorwits@oucs.ox.ac.uk> >>
 
-Andrew Payne
+Much of the design of this system came from L<CatalystX::ListFramework>, by Andrew Payne and Peter Edwards.
 
 =head1 COPYRIGHT & LICENSE
-
-Some parts of Util.pm are Copyright (c) 2007 Dragonstaff Ltd.
 
 Bundled images are Copyright (c) 2006 Mark James, and are from L<http://www.famfamfam.com/lab/icons/silk/>.
 

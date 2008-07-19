@@ -1,18 +1,22 @@
-package CatalystX::ListFramework::Core;
+package CatalystX::ListFramework::Builder::Core;
 
 use strict;
 use warnings FATAL => 'all';
 require 5.8.1;
 
 use base qw(Class::Data::Inheritable);
-use CatalystX::ListFramework::Util;
+use List::Util qw(first);
 use Scalar::Util qw(blessed);
+use List::MoreUtils qw(uniq);
 use Carp;
 
 __PACKAGE__->mk_classdata('formdefs' => {});
 
 sub new {
     my ($class, $type, $c) = @_;
+
+    return undef if !defined $type;
+
     if (exists $class->formdefs->{$type}) {
         # Return the cached instance but refresh the Catalyst context
         $class->formdefs->{$type}->{c} = $c;
@@ -70,8 +74,165 @@ sub new {
         # Set a default html type
         $s->{html_type} = 'Textfield' if !defined $s->{html_type};
     }
-    
+
+    $c->stash->{name} = $type;
+    $c->stash->{formdef} = $formdef;
     return $self;        
+}
+
+# XXX only works for simple single model applications
+# but if you want fancy, just write the formdef file
+sub build_formdef {
+    my $self = shift;
+    my ($name, $c, $formdef) =
+        @{$self}{qw(name c formdef)};
+
+    my $table = ucfirst $name;
+    my $model = first { $_ =~ m/::$table$/ } $c->models;
+
+    return if !defined $model;
+    my $source = $c->model($model)->result_source;
+
+    $formdef->{model} = $model;
+    $formdef->{title} = $table;
+    $formdef->{create_uri} = "/create/$name";
+    $formdef->{delete_uri} = "/delete/$name";
+    $formdef->{searches} = {};
+    $formdef->{infobox_order}->{$name} = 1;
+    my $box_count = 1;
+
+    my @cols = $source->columns;
+    my %pks  = map {$_ => 1} $source->primary_columns;
+    $formdef->{pks} = [ keys %pks ];
+
+    my %fks = ();
+    my @rels = $source->relationships;
+    foreach my $r (@rels) {
+        next if $source->relationship_info($r)
+                    ->{attrs}->{accessor} eq 'multi';
+        # we want belongs_to, might_have and has_one
+        $fks{$r} = $source->relationship_info($r);
+    }
+    $formdef->{fks} = [ keys %fks ];
+
+    foreach my $col (uniq @cols, keys %fks) {
+        my $info = ( scalar (grep {$_ eq $col} @cols)
+            ? $source->column_info($col) : {} );
+        my $auto = ($info->{is_auto_increment} ? 1 : 0);
+        my $reqd = ((!exists $info->{is_nullable}
+            or $info->{is_nullable}) ? 0 : 1);
+        (my $cn = ucfirst $col) =~ s/_/ /g;
+
+        if (exists $pks{$col}) {
+            # is primary key of main table
+            # might be read-only (auto inc), probably also required
+
+            $formdef->{columns}->{OBJECT} = {primary_key => $col};
+            $formdef->{columns}->{$col} = {
+                field => $col, heading => $cn};
+
+            push @{$formdef->{display}->{default}},
+                 {id => $col, heading => $cn, uri => "/get/$name/"};
+
+            push @{$formdef->{infoboxes}->{$name}}, {
+                 id => $col,
+                 heading => $cn,
+                 not_editable => $auto,
+                 required => $reqd,
+            };
+        }
+        elsif (exists $fks{$col}) {
+            # is foreign key in the main table
+            # might be required, unlikely to be read-only (auto inc)
+
+            (my $fn = $fks{$col}->{source}) =~ s/^.+:://;
+            my $fname = lc $fn;
+
+            $formdef->{infobox_order}->{$fname} = ++$box_count;
+            $formdef->{uses}->{$col} = $fname;
+            $formdef->{used}->{$fname} = $col;
+
+            $formdef->{columns}->{$col} = {
+                field => $col, heading => $fn };
+
+            push @{$formdef->{display}->{default}}, {
+                 id => "$col\@OBJECT",
+                 heading => $fn,
+                 uri => "/get/$fname/",
+            };
+
+            push @{$formdef->{infoboxes}->{$name}}, {
+                 id => "$col\@OBJECT",
+                 heading => $fn,
+                 required => $reqd,
+            };
+
+            # process infobox for related table
+            my $fsource = $source->schema->source($fn);
+            my @fcols   = $fsource->columns;
+            my @fpks    = $fsource->primary_columns;
+            my @frels   = $fsource->relationships;
+
+            foreach my $fcol (@fcols) {
+                my $finfo = $fsource->column_info($fcol);
+                my $fauto = ($finfo->{is_auto_increment} ? 1 : 0);
+                my $freqd = ($finfo->{is_nullable} ? 0 : 1);
+                (my $fcn = ucfirst $fcol) =~ s/_/ /g;
+
+                if (grep { $_ eq $fcol } @frels) {
+                    # is foreign key in the foreign table
+                    # might be required, unlikely to be read-only (auto inc)
+
+                    my $ffname =
+                        lc $fsource->relationship_info($fcol)->{source};
+                    $ffname =~ s/^.+:://;
+                    $formdef->{uses}->{$fcol} = $ffname;
+                    $formdef->{used}->{$ffname} = $fcol;
+
+                    push @{$formdef->{infoboxes}->{$fname}}, {
+                         id => "$fname.$fcol\@OBJECT",
+                         heading => $fcn,
+                         required => $freqd,
+                    };
+                }
+                else {
+                    # is other col (primary or ordinary) in the foreign table
+                    # might be read-only (auto-inc), might be required
+
+                    push @{$formdef->{infoboxes}->{$fname}}, {
+                         id => "$fname.$fcol",
+                         heading => $fcn,
+                         not_editable => $fauto,
+                         required => $freqd,
+                    };
+                }
+            }
+
+        }
+        else {
+            # regular column
+            # might be read-only (auto-inc), might be required
+
+            $formdef->{columns}->{$col} = {
+                field => $col, heading => $cn };
+            $formdef->{columns}->{$col}->{default_value} =
+                $info->{default_value} if $info->{default_value};
+
+            push @{$formdef->{display}->{default}},
+                 {id => $col, heading => $cn};
+
+            push @{$formdef->{infoboxes}->{$name}}, {
+                 id => $col,
+                 heading => $cn,
+                 not_editable => $auto,
+                 required => $reqd,
+            };
+        }
+    }
+
+    #use Data::Dumper;
+    #die Dumper $formdef;
+    return $self;
 }
 
 sub build_table_data {
@@ -123,7 +284,7 @@ sub build_table_data {
     return $data;
 }
 
-sub jupdate_from_query {  # Update a record. Probably called from an infobox screen
+sub jupdate_from_query {
     my $self = shift;
     my ($name, $c, $formdef) =
         @{$self}{qw(name c formdef)};
@@ -214,38 +375,14 @@ sub stash_json_list {
     my $sort  = $c->req->params->{'sort'}  || $formdef->{pks}->[0];
     (my $dir  = $c->req->params->{'dir'}   || 'ASC') =~ s/\s//g;
 
-    my $list_columns = $self->{formdef}->{display}->{default}
-        or confess("No columns defined for view default"); # TODO more views
-    my $join_arg = $self->join_arg_from_columns($list_columns);
+    my @columns = map { $_->{id} } @{$formdef->{display}->{default}};
 
-    my $search_opts = {
-        'join' => $join_arg, 'prefetch' => $join_arg,
-        'page' => $page, 'rows' => $limit,
-    };
+    my $search_opts = { 'page' => $page, 'rows' => $limit, };
 
-    # Copy metadata (headings etc) from 'columns' (maybe in a related form
-    # file) to 'display'
-    $self->copy_metadata_from_columns($list_columns);
-
-    # As we've copied metadata from 'columns' to 'display', we can just grep
-    # display for the ID we've been passed and get the order_by info from
-    # there.
-        
-    my ($order_column) = grep {$_->{id} eq $sort} (@$list_columns) or die
-        "Can't find a column with id $sort";
-
-    # FIXME this is untested
-    if ($sort !~ m/\@OBJECT$/) {
-        my @orders = ref($order_column->{order_by}) ? @{$order_column->{order_by}}
-                                                    : $order_column->{order_by};
-
-        my $sql_table = 'me';
-        if ($sort =~ m{(.+\.)?(\w+)\.\w+$}) {
-            $sql_table = $2;
-        }
-        foreach my $sql_column (@orders) {
-            push @{$search_opts->{order_by}}, \"$sql_table.$sql_column $dir";
-        }
+    if ($sort !~ m/\@OBJECT$/
+        and $dir =~ m/^(?:ASC|DESC)$/
+        and $sort =~ m/^\w+$/) {
+        $search_opts->{order_by} = \"$sort $dir";
     }
 
     # find filter fields in UI form
@@ -263,15 +400,13 @@ sub stash_json_list {
     };
 
     my $rs = $c->model($self->{formdef}->{model})->search($filter, $search_opts);
-    my @processed;
 
     # make data structure for JSON output
     while (my $row = $rs->next) {
-        my $processed = $self->rowobject_to_columns($row, $list_columns);
         my $data = {};
-        foreach my $col (@$list_columns) {
-            $data->{$col->{id}} = (defined $processed->{$col->{id}} ?
-                "$processed->{$col->{id}}" : ''); # stringify
+        foreach my $col (@columns) {
+            ( my $name = $col ) =~ s/\@OBJECT$//;
+            $data->{$col} = (defined $row->$name ? $row->$name.'' : '');
         }
         push @{$c->stash->{rows}}, $data;
     }

@@ -1,10 +1,17 @@
-CatalystX::ListFramework::Builder (0.06) UNRELEASED; urgency=low
+libcatalystx-listframework-builder (0.07) UNRELEASED; urgency=low
+
+  * Refactored to remove Util.pm which was legacy stuff from ListFramework.pm
+  * Simplified the Controlller by using a begin() action
+
+ -- Oliver Gorwits <oliver.gorwits@oucs.ox.ac.uk>  Sat, 19 Jul 2008 17:04:37 +0100
+
+libcatalystx-listframework-builder (0.06) UNRELEASED; urgency=low
 
   * Removed Helpers which was a hang-over from the other ListFramework.
 
  -- Oliver Gorwits <oliver.gorwits@oucs.ox.ac.uk>  Fri, 18 Jul 2008 23:41:00 +0100
 
-CatalystX::ListFramework::Builder (0.05) UNRELEASED; urgency=low
+libcatalystx-listframework-builder (0.05) UNRELEASED; urgency=low
 
   * Initial release on an unsuspecting world.
     For more details see the TODO file.

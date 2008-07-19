@@ -4,51 +4,47 @@ use strict;
 use warnings FATAL => 'all';
 
 use base 'Catalyst::Controller';
-use CatalystX::ListFramework::Core;
+use CatalystX::ListFramework::Builder::Core;
 
 use File::stat;
 use File::Basename;
 
 # Set the actions in this controller to be registered with no prefix
 __PACKAGE__->config->{namespace} = '';
+my $lf;
 
-sub helloworld :Path('/helloworld') {
-    my ( $self, $c ) = @_;
-    $c->res->output('Hello world!');
+sub begin :Private {
+    my ($self, $c, $kind) = @_;
+    $lf = CatalystX::ListFramework::Builder::Core->new($kind, $c);
 }
-
-# TODO: CatalystX::ListFramework->new can be in an auto() thing
 
 sub default :Path {
     my ($self, $c, $kind) = @_;
-    my $lf = CatalystX::ListFramework::Core->new($kind, $c);
-    $c->stash->{name}     = $lf->{name};
-    $c->stash->{formdef}  = $lf->{formdef};
     $c->stash->{template} = 'list-and-search.tt';
     $c->view('TT')->process($c);
 }
 
 sub jlist :Path('/jlist') {
     my ($self, $c, $kind) = @_;
-    my $lf = CatalystX::ListFramework::Core->new($kind, $c)->stash_json_list();
+    $lf->stash_json_list();
     $c->view('JSON')->process($c);
 }
 
 sub jget_stringified :Path('/jget_stringified') {
     my ($self, $c, $kind) = @_;
-    my $lf = CatalystX::ListFramework::Core->new($kind, $c)->jget_stringified();
+    $lf->jget_stringified();
     $c->view('JSON')->process($c);
 }
 
 sub jupdate :Path('/jupdate') {
     my ($self, $c, $kind) = @_;
-    my $lf = CatalystX::ListFramework::Core->new($kind, $c)->jupdate_from_query();
+    $lf->jupdate_from_query();
     $c->view('JSON')->process($c);
 }
 
 sub jdelete :Path('/jdelete') {
     my ($self, $c, $kind) = @_;
-    my $lf = CatalystX::ListFramework::Core->new($kind, $c)->jdelete();
+    $lf->new($kind, $c)->jdelete();
     $c->view('JSON')->process($c);
 }
 
@@ -93,6 +89,11 @@ sub image :Path('/image') {
     $c->log->debug(qq/Failed to serve file "$path"/) if $c->debug;
     $c->res->status(404);
     return 0;
+}
+
+sub helloworld :Path('/helloworld') {
+    my ( $self, $c ) = @_;
+    $c->res->output('Hello world!');
 }
 
 1;
