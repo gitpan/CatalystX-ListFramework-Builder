@@ -21,6 +21,11 @@
     cursor: auto !important;
 }
 
+.half-grey {
+    color: #aaaaaa !important;
+    cursor: auto !important;
+}
+
 .x-grid3-cell-last img {
     vertical-align: middle;
 }

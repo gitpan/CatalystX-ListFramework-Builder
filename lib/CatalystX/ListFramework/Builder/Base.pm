@@ -8,8 +8,6 @@ use Class::C3;
 
 use Catalyst qw/ConfigLoader/;
 
-our $VERSION = '1.00';
-
 # override Catalyst's own component setup, because after the bootstrapping in
 # Builder.pm Catalyst won't spot the components, so we set them up ourselves.
 sub setup_components {

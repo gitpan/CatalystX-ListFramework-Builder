@@ -1,5 +1,4 @@
     // turn on validation errors beside the field globally
-    Ext.QuickTips.init();
     Ext.form.Field.prototype.msgTarget = 'side';
 
     var tabs = [

@@ -2,6 +2,8 @@
 
 Ext.onReady(function(){
 
+    Ext.QuickTips.init();
+
     // create the Data Store
     [% PROCESS javascript/store.tt %]
 

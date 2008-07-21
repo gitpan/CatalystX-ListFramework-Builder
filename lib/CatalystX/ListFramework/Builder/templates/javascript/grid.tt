@@ -15,17 +15,40 @@
             ,editor:     new Ext.form.TextField({})
         },
       [% END -%]
+      [% FOREACH col IN formdef.multi -%]
+        {
+            header: '[% col FILTER ucfirst %]'
+            ,dataIndex: 'lf-multi-column'
+            ,align: 'center'
+            ,sortable: false
+            ,tooltip: 'Hover mouse over a cell<br />to show related data'
+            ,renderer: function (value,metadata,record,rowindex,colindex,store) {
+                if (value == '(click to add filter)') {
+                    return '';
+                }
+                else {
+                    metadata.attr += 'ext:qtitle="[% col FILTER ucfirst %]" ext:qtip="'
+                        + (record.get('[% col %]').join(',<br />') || 'none')
+                        + '" ext:qwidth="175"';
+                    metadata.css += 'half-grey';
+                    return '<img src="[% c.req.base %]/image/magnifier.png"/>'
+                        + ' Show';
+                }
+            }
+        },
+      [% END -%]
         {
             header: 'Delete'
             ,dataIndex: 'lf-delete-column'
             ,align: 'center'
+            ,sortable: false
             ,renderer: function (value,metadata,record,rowindex,colindex,store) {
                 if (value == '(click to add filter)') {
                     return '';
                 }
                 else {
                     return '<img src="[% c.req.base %]/image/bin_closed.png"/>'
-                        + ' Delete [% formdef.title %]';
+                        + ' Delete';
                 }
             }
         }
@@ -130,6 +153,11 @@
 
                 // reset the grid selectionModel
                 g.getSelectionModel().deselectRow(row);
+
+                if (fieldName == 'lf-multi-column') {
+                    // multi rows are ignored
+                    return false;
+                }
 
                 if (fieldName == 'lf-delete-column') {
                     if (row == 0) {

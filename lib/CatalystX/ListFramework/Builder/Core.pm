@@ -67,8 +67,6 @@ sub new {
         $s->{html_type} = 'Textfield' if !defined $s->{html_type};
     }
 
-    $c->stash->{name} = $type;
-    $c->stash->{formdef} = $formdef;
     return $self;        
 }
 
@@ -98,15 +96,20 @@ sub build_formdef {
     my %pks  = map {$_ => 1} $source->primary_columns;
     $formdef->{pks} = [ keys %pks ];
 
-    my %fks = ();
+    my (%fks, %multi);
     my @rels = $source->relationships;
     foreach my $r (@rels) {
-        next if $source->relationship_info($r)
-                    ->{attrs}->{accessor} eq 'multi';
-        # we want belongs_to, might_have and has_one
-        $fks{$r} = $source->relationship_info($r);
+        if ($source->relationship_info($r)
+                    ->{attrs}->{accessor} ne 'multi') {
+            # we want belongs_to, might_have and has_one
+            $fks{$r} = $source->relationship_info($r);
+        }
+        else {
+            $multi{$r} = $source->relationship_info($r);
+        }
     }
-    $formdef->{fks} = [ keys %fks ];
+    $formdef->{fks}   = [ keys %fks ];
+    $formdef->{multi} = [ keys %multi ];
 
     foreach my $col (uniq @cols, keys %fks) {
         my $info = ( scalar (grep {$_ eq $col} @cols)
@@ -370,12 +373,12 @@ sub stash_json_list {
 
     my @columns = map { $_->{id} } @{$formdef->{display}->{default}};
 
-    my $search_opts = { 'page' => $page, 'rows' => $limit, };
+    my $search_opts = { 'page' => $page, 'rows' => $limit, }; #prefetch => $formdef->{multi} };
 
     if ($sort !~ m/\@OBJECT$/
         and $dir =~ m/^(?:ASC|DESC)$/
         and $sort =~ m/^\w+$/) {
-        $search_opts->{order_by} = \"$sort $dir";
+        $search_opts->{order_by} = \"me.$sort $dir";
     }
 
     # find filter fields in UI form
@@ -392,6 +395,7 @@ sub stash_json_list {
         } @filterfields
     };
 
+    #$c->model($self->{formdef}->{model})->result_source->storage->debug(1);
     my $rs = $c->model($self->{formdef}->{model})->search($filter, $search_opts);
 
     # make data structure for JSON output
@@ -401,8 +405,17 @@ sub stash_json_list {
             ( my $name = $col ) =~ s/\@OBJECT$//;
             $data->{$col} = (defined $row->$name ? $row->$name.'' : '');
         }
+        foreach my $m (@{$formdef->{multi}}) {
+            #my $handle = $m .'_rs';
+            #my $mrs = $row->$handle;
+            #while (my $item = $mrs->next) {
+            #    push @{$data->{$m}}, "$item";
+            #}
+            $data->{$m} = [ map { "$_" } $row->$m->all ];
+        }
         push @{$c->stash->{rows}}, $data;
     }
+    #$c->model($self->{formdef}->{model})->result_source->storage->debug(0);
 
     if ($sort =~ m/\@OBJECT$/) {
         @{$c->stash->{rows}} = sort {
@@ -414,6 +427,8 @@ sub stash_json_list {
     $c->stash->{rows} ||= {};
     $c->stash->{total} = $rs->pager->total_entries || 0;
 
+    #use Data::Dumper;
+    #print STDERR Dumper $c->stash->{rows};
     return $self;
 }
 

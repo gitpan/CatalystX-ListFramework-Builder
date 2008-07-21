@@ -3,6 +3,9 @@
       [% FOREACH col IN formdef.display.default -%]
         { name: '[% col.id %]' },
       [% END -%]
+      [% FOREACH col IN formdef.multi -%]
+        { name: '[% col %]' },
+      [% END -%]
     ]);
 
     // create the Data Store

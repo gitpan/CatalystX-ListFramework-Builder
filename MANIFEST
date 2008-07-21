@@ -10,6 +10,7 @@ lib/CatalystX/ListFramework/Builder/Base.pm
 lib/CatalystX/ListFramework/Builder/images/bin_closed.png
 lib/CatalystX/ListFramework/Builder/images/add.png
 lib/CatalystX/ListFramework/Builder/images/find.png
+lib/CatalystX/ListFramework/Builder/images/magnifier.png
 lib/CatalystX/ListFramework/Builder/View/TT.pm
 lib/CatalystX/ListFramework/Builder/View/JSON.pm
 lib/CatalystX/ListFramework/Builder/Model/DBIC.pm
