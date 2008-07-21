@@ -3,7 +3,7 @@ package CatalystX::ListFramework::Builder;
 use strict;
 use warnings FATAL => 'all';
 
-our $VERSION = 0.11;
+our $VERSION = 0.12;
 
 sub build_listframework {
     my ($class, $config) = @_;
@@ -58,7 +58,7 @@ CatalystX::ListFramework::Builder - Instant AJAX web front-end for DBIx::Class, 
 
 =head1 VERSION
 
-This document refers to version 0.11 of CatalystX::ListFramework::Builder
+This document refers to version 0.12 of CatalystX::ListFramework::Builder
 
 =head1 WARNING
 

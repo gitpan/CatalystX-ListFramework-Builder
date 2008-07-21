@@ -1,4 +1,4 @@
-libcatalystx-listframework-builder (0.11) UNRELEASED; urgency=low
+libcatalystx-listframework-builder (0.12) UNRELEASED; urgency=low
 
   * Added columns for one_to_many relations using a tooltip to show data
 
