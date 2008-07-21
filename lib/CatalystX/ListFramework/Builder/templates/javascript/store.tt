@@ -47,7 +47,6 @@
         for (var id in cols) {
             var name = cols[id].dataIndex;
             if (isFK(name)) {
-                searchrow[name] = 'click to view ' + cols[id].header + ' table';
                 continue;
             }
             if (params['search.' + name]) {

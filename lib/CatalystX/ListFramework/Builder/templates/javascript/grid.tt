@@ -6,7 +6,11 @@
     var cm = new Ext.grid.ColumnModel([
       [% FOREACH col IN formdef.display.default -%]
         {
+          [% IF col.id.search('\@OBJECT$') %]
+            header:     '[% col.heading %] (FK)'
+          [% ELSE %]
             header:     '[% col.heading %]'
+          [% END %]
             ,dataIndex:  '[% col.id %]'
             ,editor:     new Ext.form.TextField({})
         },
@@ -35,6 +39,7 @@
         ,pageSize: 10
         ,store: store
         ,displayInfo: true
+        ,displayMsg: 'LFB v[% version %], Displaying {0} - {1} of {2}'
         ,items:[
             '-' ,{
                 text: 'Clear Filters'
@@ -46,7 +51,7 @@
                     pagebar.doLoad(pagebar.cursor);
                 }
             }
-            ,' ',{
+            ,' ' ,{
                 text: 'Apply Filters'
                 ,cls: 'x-btn-text-icon'
                 ,icon: '[% c.req.base %]/image/find.png'
@@ -75,8 +80,35 @@
                     win.show(this);
                 }
             }
+            ,'-' ,'Go to:' ,' ' ,{
+                xtype: 'combo'
+                ,mode: 'local'
+                ,readOnly: true
+                ,editable: false
+                ,forceSelection: true
+                ,lazyInit: false
+                ,emptyText: 'Select a table ...'
+                ,store: [
+                  [% FOREACH table IN formdef.tables -%]
+                    '[% table %]',
+                  [% END -%]
+                ]
+                ,listeners: {
+                    beforeselect: function(combo, record, index) {
+                        window.location =
+                            '[% c.req.uri.replace(formdef.infobox_order.nsort.first, '') %]'
+                                + tableLookup[index];
+                        return false;
+                    }
+                }
+            }
         ]
     });
+
+    var tableLookup = new Array();
+    [% FOREACH table IN formdef.tables -%]
+    tableLookup[[% loop.index %]] = '[% table FILTER lower %]';
+    [% END -%]
 
     var grid = new Ext.grid.EditorGridPanel({
         id: 'search-grid'
@@ -143,14 +175,6 @@
 
                 if (row == 0) {
                     if (isFK(fieldName)) {
-                        // FK is hyperlink to its table
-                        var usesTable = new Array();
-                        [% FOREACH ref IN formdef.uses %]
-                            usesTable['[% ref.key %]'] = '[% ref.value %]';
-                        [% END %]
-                        window.location =
-                            '[% c.req.uri.replace(formdef.infobox_order.nsort.first, '') %]'
-                                + usesTable[fieldName.replace(/\@OBJECT/,'')];
                         return false;
                     }
 

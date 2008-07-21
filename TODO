@@ -1,12 +1,9 @@
 FEATURE
- - Externally loaded Helpers
- - more Helpers - start with Boolean
-
-CODE
- - Look at DBIC Cascade settings
- - Use Symbol::qualify_to_ref where appropriate
+ - Data type helpers
 
 DONE
+ - Display CLB version in the toolbar
+ - Drop-down listbox in toolbar to go to other tables in schema
  - More documentation
  - Icon for delete column
  - Refactor create/update code

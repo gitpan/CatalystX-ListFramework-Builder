@@ -20,6 +20,7 @@ sub begin :Private {
 
 sub default :Path {
     my ($self, $c, $kind) = @_;
+    $c->stash->{version} = $CatalystX::ListFramework::Builder::VERSION;
     $c->stash->{template} = 'list-and-search.tt';
     $c->view('TT')->process($c);
 }

@@ -2,7 +2,6 @@ package CatalystX::ListFramework::Builder::Core;
 
 use strict;
 use warnings FATAL => 'all';
-require 5.8.1;
 
 use base qw(Class::Data::Inheritable);
 use List::Util qw(first);
@@ -14,14 +13,7 @@ __PACKAGE__->mk_classdata('formdefs' => {});
 
 sub new {
     my ($class, $type, $c) = @_;
-
     return undef if !defined $type;
-
-    if (exists $class->formdefs->{$type}) {
-        # Return the cached instance but refresh the Catalyst context
-        $class->formdefs->{$type}->{c} = $c;
-        return $class->formdefs->{$type};
-    }
 
     my $self = bless {
         formdef => {},
@@ -99,6 +91,7 @@ sub build_formdef {
     $formdef->{delete_uri} = "/delete/$name";
     $formdef->{searches} = {};
     $formdef->{infobox_order}->{$name} = 1;
+    $formdef->{tables} = [ $source->schema->sources ];
     my $box_count = 1;
 
     my @cols = $source->columns;
