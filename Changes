@@ -1,3 +1,22 @@
+libcatalystx-listframework-builder (0.13) UNRELEASED; urgency=low
+
+  * Add selector for num of displayed rows (default 10)
+  * Disable menu on the Delete and Multi columns (Laust Frederiksen)
+  * Align images to middle of text (delete and related data cells)
+  * Filter search is now case insensitive
+  * Clean up some of the qtip handling
+  * Considerable, major refactoring of the whole distribution
+  * No more ListFramework object - metadata is all stored in the stash
+  * Delete sequence is modal whilst AJAX delete is being called
+  * Overhaul relations parsing so that might_have and has_one now work if set
+  * Improved rendering of boolean type in list view using tick/cross images
+  * Improved presentation of a few field types in the form (bool, dates)
+  * Fox for missing checkbox fields as per the HTML spec
+  * Rudimentary data import/export filtering for some types eg bool,date
+  * Comment out TT:XS stash use
+
+ -- Networks Pseudouser <networks@wyoming.oucs.ox.ac.uk>  Sun,  3 Aug 2008 20:08:45 +0100
+
 libcatalystx-listframework-builder (0.12) UNRELEASED; urgency=low
 
   * Added columns for one_to_many relations using a tooltip to show data

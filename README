@@ -3,7 +3,7 @@ NAME
     DBIx::Class, using Catalyst
 
 VERSION
-    This document refers to version 0.12 of
+    This document refers to version 0.13 of
     CatalystX::ListFramework::Builder
 
 WARNING
@@ -83,8 +83,8 @@ USAGE
     database. Then use the following command-line incantation:
 
      perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:. -e \
-         make_schema_at("DBIC::Database::Foo::Schema", { relationships => 1 }, \
-         ["dbi:Pg:dbname=foodb;host=mydbhost.example.com","user","pass" ])
+         'make_schema_at("DBIC::Database::Foo::Schema", { relationships => 1 }, \
+         ["dbi:Pg:dbname=foodb;host=mydbhost.example.com","user","pass" ])'
 
     This will create a directory (such as "DBIC") which you need to move
     into your Perl Include path.

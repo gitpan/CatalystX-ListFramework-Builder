@@ -1,16 +1,16 @@
     // create a data record
     var rowRecord = Ext.data.Record.create([
-      [% FOREACH col IN formdef.display.default -%]
-        { name: '[% col.id %]' },
+      [% FOREACH col IN lf.main.col_order -%]
+        { name: '[% col %]' },
       [% END -%]
-      [% FOREACH col IN formdef.multi -%]
+      [% FOREACH col IN lf.main.mfks.keys -%]
         { name: '[% col %]' },
       [% END -%]
     ]);
 
     // create the Data Store
     var store = new Ext.data.JsonStore({
-        url: '[% c.req.base %]jlist/[% name %]',
+        url: '[% c.req.base %]list/[% lf.main.path %]',
         root: 'rows',
         fields: rowRecord,
         remoteSort: true,
@@ -18,7 +18,7 @@
     });
 
     // set default sort if we can
-    store.setDefaultSort('[% formdef.columns.OBJECT.primary_key %]', 'ASC');
+    store.setDefaultSort('[% lf.main.pk %]', 'ASC');
 
     // hook to add page num param
     // got this from the extjs forums
@@ -29,11 +29,24 @@
         return true;
     });
 
+    // toolkit for checkbox cols
+    var CheckTable = new Array();
+    [%- FOREACH col IN lf.main.cols.keys %]
+      [%- NEXT UNLESS lf.main.cols.$col.extjs_xtype == 'checkbox' %]
+      CheckTable['[% col %]'] = 1;
+    [%- END %]
+    function isCheck (c) {
+        return !! CheckTable[c];
+    }
 
-    // toolkit stuff for checking for foreign keys
-    var isFK_re = /@OBJECT$/;
-    function isFK (s) {
-        return String(s).search (isFK_re) != -1;
+    // toolkit for checking for foreign keys
+    var FKTable = new Array();
+    [%- FOREACH col IN lf.main.cols.keys %]
+      [%- NEXT UNLESS lf.main.cols.$col.is_fk %]
+      FKTable['[% col %]'] = 1;
+    [%- END %]
+    function isFK (c) {
+        return !! FKTable[c];
     }
 
     // insert row for adding search filters

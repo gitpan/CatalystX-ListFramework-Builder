@@ -16,18 +16,17 @@
     cursor: pointer;
 }
 
-.half-grey td, .x-grid3-dirty-row td {
+.half-grey, .x-grid3-dirty-row td {
     color: #aaaaaa !important;
     cursor: auto !important;
 }
 
-.half-grey {
-    color: #aaaaaa !important;
-    cursor: auto !important;
-}
-
-.x-grid3-cell-last img {
+.x-grid3-cell img {
     vertical-align: middle;
+}
+
+.x-panel {
+    padding: 10px;
 }
 
 </style>

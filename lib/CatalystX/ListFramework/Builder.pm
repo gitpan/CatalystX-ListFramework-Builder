@@ -3,7 +3,7 @@ package CatalystX::ListFramework::Builder;
 use strict;
 use warnings FATAL => 'all';
 
-our $VERSION = 0.12;
+our $VERSION = 0.13;
 
 sub build_listframework {
     my ($class, $config) = @_;
@@ -12,7 +12,10 @@ sub build_listframework {
     # these are the boilerplate Catalyst components for ListFramework
     my @packages = qw(
         Controller::Root
+        Controller::Image
+        Controller::AJAX
         Model::DBIC
+        Model::Metadata
         View::JSON
         View::TT
     );
@@ -58,7 +61,7 @@ CatalystX::ListFramework::Builder - Instant AJAX web front-end for DBIx::Class, 
 
 =head1 VERSION
 
-This document refers to version 0.12 of CatalystX::ListFramework::Builder
+This document refers to version 0.13 of CatalystX::ListFramework::Builder
 
 =head1 WARNING
 
@@ -143,8 +146,8 @@ application. For example C<DBIC::Database::Foo::Schema> for the C<Foo>
 database. Then use the following command-line incantation:
 
  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:. -e \
-     make_schema_at("DBIC::Database::Foo::Schema", { relationships => 1 }, \
-     ["dbi:Pg:dbname=foodb;host=mydbhost.example.com","user","pass" ])
+     'make_schema_at("DBIC::Database::Foo::Schema", { relationships => 1 }, \
+     ["dbi:Pg:dbname=foodb;host=mydbhost.example.com","user","pass" ])'
 
 This will create a directory (such as C<DBIC>) which you need to move into
 your Perl Include path.

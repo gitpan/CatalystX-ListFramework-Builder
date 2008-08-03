@@ -1,7 +1,13 @@
 FEATURE
- - Data type helpers
+ - Helpful page for when the table in the url is missing/wrong
+ - support for multiple FK referencing the same table (see _build_table_data
+   and @related)
 
 DONE
+ - Data type helpers (rudmentary)
+ - Finish work on might_have and has_one support
+ - Delete entry confirmation is not modal
+ - Option to set displayed num of rows in list
  - Display CLB version in the toolbar
  - Drop-down listbox in toolbar to go to other tables in schema
  - More documentation
@@ -19,5 +25,6 @@ DONE
  - Make TT files use configurable URL paths (e.g. css)
 
 WONTFIX
+ - FK cell is hyperlink to filtered view on other table
  - Multi column PKs (via path parts?)/Col 'id' assumed as PK (path parts?)
 

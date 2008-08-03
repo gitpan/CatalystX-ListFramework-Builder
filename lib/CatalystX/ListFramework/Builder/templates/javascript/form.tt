@@ -1,40 +1,64 @@
     // turn on validation errors beside the field globally
     Ext.form.Field.prototype.msgTarget = 'side';
 
+    // BUG FIX for align of checkboxes in forms
+    // see: http://extjs.com/forum/showthread.php?t=37685
+    Ext.override(Ext.form.Checkbox, {
+        onResize : function(){
+        Ext.form.Checkbox.superclass.onResize.apply(this, arguments);
+            if (!this.boxLabel && !this.fieldLabel) {
+                this.el.alignTo(this.wrap, 'c-c');
+            }
+        }
+    }); 
+
     var tabs = [
-      [% FOREACH tname IN formdef.infobox_order.nsort -%]
+      [% FOREACH tname IN lf.tab_order.nsort -%]
+        [%- SET info = lf.table_info.$tname %]
         {
-            [% IF formdef.infobox_order.$tname == 1 -%]
-              title: '[% tname FILTER ucfirst %]'
+            [% IF lf.tab_order.item(tname) == 1 -%]
+              title: '[% lf.main.title %]'
             [% ELSE -%]
-              title: 'New [% tname FILTER ucfirst %]'
+              title: 'New [% info.title %]'
               ,xtype: 'fieldset'
               ,checkboxToggle: true
-              ,checkboxName: 'checkbox.[% tname %]'
+              ,checkboxName: 'checkbox.[% info.table %]'
               ,collapsed: true
             [% END -%]
 
             ,items: [
-              [% FOREACH field IN formdef.infoboxes.$tname %]
+              [% FOREACH field IN info.col_order %]
+              [% NEXT IF info.cols.$field.is_rr %]
                 {
-                    name: '[% field.id %]'
-                    ,id: '[% field.id %]'
-                    ,fieldLabel: '[% field.heading %]'
+                  [%- IF lf.tab_order.item(tname) == 1 %]
+                    name: '[% field %]'
+                    ,id: '[% field %]'
+                  [%- ELSE %]
+                    name: '[% info.table %].[% field %]'
+                    ,id: '[% info.table %].[% field %]'
+                  [%- END %]
+
+                    ,fieldLabel: '[% info.cols.$field.heading %]'
                     ,anchor: '-20'
                     ,autoHeight: true
-                  [% IF field.not_editable %]
+                  
+                  [% IF info.cols.$field.default_value %]
+                    ,value: '[% info.cols.$field.default_value %]'
+                  [% END %]
+
+                  [% UNLESS info.cols.$field.editable %]
                     ,readOnly: true
                     ,cls: 'x-item-disabled'
                     //,disabled: true // argh, prevents submit :-( so use cls
-                  [% ELSIF field.required %]
+                  [% ELSIF info.cols.$field.required %]
                     ,allowBlank: false
                   [% END %]
-                  [% IF field.id.search('\@OBJECT$') %]
-                    [% SET fkname = field.id.replace('\@OBJECT','') %]
+
+                  [% IF info.cols.$field.is_fk AND info.cols.$field.editable %]
                     ,xtype: 'combo'
                     ,displayField: 'stringified'
                     ,valueField: 'dbid'
-                    ,hiddenName: 'combobox.[% field.id %]'
+                    ,hiddenName: 'combobox.[% field %]'
                     ,loadingText: 'Searching...'
                     ,forceSelection: true
                     ,selectOnFocus: true
@@ -42,7 +66,7 @@
                     ,pageSize: 5
                     ,triggerAction: 'all'
                     ,store: new Ext.data.JsonStore({
-                        url: '[% c.req.base %]jget_stringified/[% tname %]'
+                        url: '[% c.req.base %]get_stringified/[% info.path %]'
                         ,root: 'rows' ,totalProperty: 'total'
                         ,fields: [ 'dbid', 'stringified' ]
                         ,listeners: {
@@ -50,11 +74,14 @@
                                 var start = options.params.start;
                                 var limit = options.params.limit;
                                 options.params.page = Math.floor(start / limit) + 1;
-                                options.params.fkname = '[% fkname %]';
+                                options.params.fkname = '[% field %]';
                                 return true;
                             }
                         }
                     })
+                  [% ELSE %]
+                    ,xtype: '[% info.cols.$field.extjs_xtype OR "textfield" %]'
+                    [% info.cols.$field.extjs_xtype_extra %]
                   [% END %]
                 },
               [% END %]
@@ -65,7 +92,7 @@
 
     var generate_win = function() {
         return new Ext.Window({
-            title: 'Edit [% formdef.title %]'
+            title: 'Edit [% lf.main.title %]'
             ,id: 'main-win'
             ,collapsible: true
             ,closable: true
@@ -79,7 +106,7 @@
                 xtype: 'form'
                 ,id: 'form-panel'
                 ,border: false
-                ,url: '[% c.req.base %]jupdate/[% name %]'
+                ,url: '[% c.req.base %]update/[% lf.main.path %]'
                 ,autoHeight: true
                 ,layout: 'fit'
     

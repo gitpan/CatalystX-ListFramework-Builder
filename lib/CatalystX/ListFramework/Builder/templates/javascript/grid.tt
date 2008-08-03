@@ -4,34 +4,47 @@
     // dataIndex maps the column to the specific data field in
     // the data store
     var cm = new Ext.grid.ColumnModel([
-      [% FOREACH col IN formdef.display.default -%]
+      [% FOREACH col IN lf.main.col_order -%]
         {
-          [% IF col.id.search('\@OBJECT$') %]
-            header:     '[% col.heading %] (FK)'
+          [% IF lf.main.cols.$col.is_fk %]
+            header:     '[% lf.main.cols.$col.heading %] (FK)'
           [% ELSE %]
-            header:     '[% col.heading %]'
+            header:     '[% lf.main.cols.$col.heading %]'
           [% END %]
-            ,dataIndex:  '[% col.id %]'
-            ,editor:     new Ext.form.TextField({})
+            ,dataIndex: '[% col %]'
+            ,editor:    new Ext.form.TextField({})
+            ,renderer: function (value,metadata,record,rowindex,colindex,store) {
+              [% IF lf.main.cols.$col.extjs_xtype == 'checkbox' %]
+                if (value == '(click to add filter)') { return '' }
+                if (value == '1') {
+                  return '<img src="[% c.req.base %]/image/bullet_green.png"/>';
+                }
+                else {
+                  return '<img src="[% c.req.base %]/image/bullet_red.png"/>';
+                }
+              [% ELSE %]
+                return value;
+              [% END %]
+            }
         },
       [% END -%]
-      [% FOREACH col IN formdef.multi -%]
+      [% FOREACH col IN lf.main.mfks.keys -%]
         {
-            header: '[% col FILTER ucfirst %]'
+            header: '[% lf.main.mfks.item(col) %]'
             ,dataIndex: 'lf-multi-column'
             ,align: 'center'
             ,sortable: false
+            ,menuDisabled: true
             ,tooltip: 'Hover mouse over a cell<br />to show related data'
             ,renderer: function (value,metadata,record,rowindex,colindex,store) {
-                if (value == '(click to add filter)') {
-                    return '';
-                }
+                if (value == '(click to add filter)') { return '' }
                 else {
-                    metadata.attr += 'ext:qtitle="[% col FILTER ucfirst %]" ext:qtip="'
-                        + (record.get('[% col %]').join(',<br />') || 'none')
-                        + '" ext:qwidth="175"';
+                    metadata.attr += 'ext:qtitle="[% lf.main.mfks.item(col) %]" ext:qtip="'
+                        + (record.get('[% col %]').join(',<br />') || '(none)') + '"';
                     metadata.css += 'half-grey';
-                    return '<img src="[% c.req.base %]/image/magnifier.png"/>'
+                    return '<img ext:qtitle="[% lf.main.mfks.item(col) %]" ext:qtip="'
+                        + (record.get('[% col %]').join(',<br />') || '(none)')
+                        + '" src="[% c.req.base %]/image/magnifier.png"/>'
                         + ' Show';
                 }
             }
@@ -42,10 +55,9 @@
             ,dataIndex: 'lf-delete-column'
             ,align: 'center'
             ,sortable: false
+            ,menuDisabled: true
             ,renderer: function (value,metadata,record,rowindex,colindex,store) {
-                if (value == '(click to add filter)') {
-                    return '';
-                }
+                if (value == '(click to add filter)') { return '' }
                 else {
                     return '<img src="[% c.req.base %]/image/bin_closed.png"/>'
                         + ' Delete';
@@ -62,9 +74,43 @@
         ,pageSize: 10
         ,store: store
         ,displayInfo: true
-        ,displayMsg: 'LFB v[% version %], Displaying {0} - {1} of {2}'
+        ,listeners: {
+            // fudge for the Rows selector below, when it selects 0 or 'all'
+            enable: function() {
+                if ((pagebar.pageSize == 0) || isNaN(pagebar.pageSize)) {
+                    pagebar.pageSize = pagebar.store.data.length;
+                    pagebar.updateInfo();
+                }
+            }
+        }
         ,items:[
-            '-' ,{
+            '-' ,'Rows:' ,' ' ,{
+                xtype: 'combo'
+                ,mode: 'local'
+                ,allowBlank: false
+                ,triggerAction: 'all'
+                ,lazyInit: false
+                ,width: 50
+                ,maskRe: /[0-9]/
+                ,store: [10, 20, 50, 100, 'all']
+                ,listeners: {
+                    render: function(combo) {
+                        combo.setValue(pagebar.pageSize);
+                    }
+                    ,select: function(combo) {
+                        pagebar.pageSize = parseInt(combo.getRawValue(), 10);
+                        pagebar.doLoad(pagebar.cursor);
+                    }
+                    ,specialkey: function(combo, e) {
+                        if (e.getKey() == 13) {
+                            pagebar.pageSize = parseInt(combo.getRawValue(), 10) || 'all';
+                            combo.setValue(pagebar.pageSize);
+                            pagebar.doLoad(pagebar.cursor);
+                        }
+                    }
+                }
+            }
+            ,'-' ,{
                 text: 'Clear Filters'
                 ,cls: 'x-btn-text-icon'
                 ,icon: '[% c.req.base %]image/bin_closed.png'
@@ -94,7 +140,7 @@
                 }
             }
             ,'-' ,{
-                text: 'Add New [% formdef.title %]'
+                text: 'Add New [% lf.main.title %]'
                 ,cls: 'x-btn-text-icon'
                 ,icon: '[% c.req.base %]/image/add.png'
                 ,handler: function(){
@@ -112,15 +158,13 @@
                 ,lazyInit: false
                 ,emptyText: 'Select a table ...'
                 ,store: [
-                  [% FOREACH table IN formdef.tables -%]
-                    '[% table %]',
+                  [% FOREACH table IN lf.table2path.keys.sort -%]
+                    ['[% lf.table2path.item(table) %]', '[% table %]'],
                   [% END -%]
                 ]
                 ,listeners: {
                     beforeselect: function(combo, record, index) {
-                        window.location =
-                            '[% c.req.uri.replace(formdef.infobox_order.nsort.first, '') %]'
-                                + tableLookup[index];
+                        window.location = '[% c.req.base %]' + record.data.value;
                         return false;
                     }
                 }
@@ -128,18 +172,13 @@
         ]
     });
 
-    var tableLookup = new Array();
-    [% FOREACH table IN formdef.tables -%]
-    tableLookup[[% loop.index %]] = '[% table FILTER lower %]';
-    [% END -%]
-
     var grid = new Ext.grid.EditorGridPanel({
         id: 'search-grid'
         ,el: 'list-grid'
         // ,width: 900
         ,autoHeight: true
         ,stripeRows: true
-        ,title: '[% formdef.title %] List'
+        ,title: '[% title %]'
         ,store: store
         ,loadMask: true
         ,colModel: cm
@@ -165,18 +204,20 @@
                         return false;
                     }
 
-                    var data = rec.get('[% formdef.columns.OBJECT.primary_key %]');
+                    var data = rec.get('[% lf.main.pk %]');
                     Ext.MessageBox.confirm (
-                        'Confirm Delete [% formdef.title %]'
-                        ,'Are you sure you want to delete [% formdef.title %] "' + data + '" ?'
+                        'Confirm Delete [% lf.main.title %]'
+                        ,'Are you sure you want to delete [% lf.main.title %] "' + data + '"?'
                         ,function (btn) {
                             if (btn == 'yes') {
+                                grid.loadMask.el.mask();
                                 Ext.Ajax.request({
-                                    url: '[% c.req.base %]jdelete/[% formdef.infobox_order.nsort.first %]'
+                                    url: '[% c.req.base %]delete/[% lf.main.path %]'
                                     ,params: {
                                         key: data
                                     }
                                     ,success: function(response,options) {
+                                        grid.loadMask.el.unmask();
                                         Ext.MessageBox.alert(
                                             'Success'
                                             ,'Entry successfully deleted.'
@@ -187,6 +228,7 @@
                                         );
                                     }
                                     ,failure: function(response,options) {
+                                        grid.loadMask.el.unmask();
                                         Ext.MessageBox.alert(
                                             'Problem deleting entry'
                                             ,'Sorry, the entry could not be deleted. '
@@ -202,7 +244,7 @@
                 }
 
                 if (row == 0) {
-                    if (isFK(fieldName)) {
+                    if (isFK(fieldName) || isCheck(fieldName)) {
                         return false;
                     }
 
@@ -216,16 +258,28 @@
                     win.show(this);
 
                     // handle for the form
-                    var maintable = Ext.getCmp('form-panel');
+                    var mainform = Ext.getCmp('form-panel').getForm();
 
                     // import data from grid row
-                    maintable.getForm().loadRecord(rec);
+                    mainform.loadRecord(rec);
+
+                    // fill in reverse relations
+                    mainform.setValues({
+                      [% FOREACH table IN lf.tab_order.keys %]
+                      [% NEXT IF lf.tab_order.item(table) == 1 %]
+                        [% FOREACH col IN lf.table_info.$table.cols.keys %]
+                        [% NEXT UNLESS lf.table_info.$table.cols.$col.is_fk
+                                AND NOT lf.table_info.$table.cols.$col.editable %]
+                          '[% lf.table_info.$table.table %].[% col %]': rec.data['[% lf.main.pk %]'],
+                        [% END %]
+                      [% END %]
+                    });
                 }
             }
             ,beforeedit: function(e) {
                 // cancel ENTER key driven edits from the filter row
                 // also cancel on the filter row itself if a FK
-                if ((e.row != 0) || isFK(e.field)) { return false }
+                if ((e.row != 0) || isFK(e.field) || isCheck(e.field)) { return false }
             }
             ,columnmove: function(oldidx, newidx) {
                 // XXX private parts of pagingtoolbar

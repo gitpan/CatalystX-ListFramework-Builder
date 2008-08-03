@@ -17,7 +17,10 @@ sub setup_components {
  
     my @packages = qw(
         Controller::Root
+        Controller::Image
+        Controller::AJAX
         Model::DBIC
+        Model::Metadata
         View::JSON
         View::TT
     );
