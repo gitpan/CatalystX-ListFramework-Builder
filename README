@@ -3,7 +3,7 @@ NAME
     DBIx::Class, using Catalyst
 
 VERSION
-    This document refers to version 0.13 of
+    This document refers to version 0.14 of
     CatalystX::ListFramework::Builder
 
 WARNING
@@ -189,8 +189,6 @@ SEE ALSO
     CatalystX::ListFramework is similar but has no dependency on Javascript
     (though it can use it for fancy auto-complete searches), and it also
     allows you to control which columns are rendered in the display.
-
-    *   <http://dev.catalyst.perl.org/new-wiki/crud>
 
 AUTHOR
     Oliver Gorwits "<oliver.gorwits@oucs.ox.ac.uk>"

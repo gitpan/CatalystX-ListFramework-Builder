@@ -1,3 +1,9 @@
+libcatalystx-listframework-builder (0.14) UNRELEASED; urgency=low
+
+  * Added top toolbar on the suggestion of tomboh, to reduce clutter 
+
+ -- Oliver Gorwits <oliver.gorwits@oucs.ox.ac.uk>  Sun,  3 Aug 2008 22:56:17 +0100
+
 libcatalystx-listframework-builder (0.13) UNRELEASED; urgency=low
 
   * Add selector for num of displayed rows (default 10)
@@ -6,16 +12,17 @@ libcatalystx-listframework-builder (0.13) UNRELEASED; urgency=low
   * Filter search is now case insensitive
   * Clean up some of the qtip handling
   * Considerable, major refactoring of the whole distribution
+  * As a result of above, no longer compatible with formdef files
   * No more ListFramework object - metadata is all stored in the stash
   * Delete sequence is modal whilst AJAX delete is being called
   * Overhaul relations parsing so that might_have and has_one now work if set
   * Improved rendering of boolean type in list view using tick/cross images
   * Improved presentation of a few field types in the form (bool, dates)
-  * Fox for missing checkbox fields as per the HTML spec
+  * Fix for missing checkbox fields as per the HTML spec
   * Rudimentary data import/export filtering for some types eg bool,date
   * Comment out TT:XS stash use
 
- -- Networks Pseudouser <networks@wyoming.oucs.ox.ac.uk>  Sun,  3 Aug 2008 20:08:45 +0100
+ -- Oliver Gorwits <oliver.gorwits@oucs.ox.ac.uk>  Sun,  3 Aug 2008 20:08:45 +0100
 
 libcatalystx-listframework-builder (0.12) UNRELEASED; urgency=low
 

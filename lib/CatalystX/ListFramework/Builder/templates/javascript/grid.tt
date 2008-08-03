@@ -69,48 +69,10 @@
     // by default columns are sortable
     cm.defaultSortable = true;
 
-    var pagebar = new Ext.PagingToolbar({
-        id: 'pagebar'
-        ,pageSize: 10
-        ,store: store
-        ,displayInfo: true
-        ,listeners: {
-            // fudge for the Rows selector below, when it selects 0 or 'all'
-            enable: function() {
-                if ((pagebar.pageSize == 0) || isNaN(pagebar.pageSize)) {
-                    pagebar.pageSize = pagebar.store.data.length;
-                    pagebar.updateInfo();
-                }
-            }
-        }
-        ,items:[
-            '-' ,'Rows:' ,' ' ,{
-                xtype: 'combo'
-                ,mode: 'local'
-                ,allowBlank: false
-                ,triggerAction: 'all'
-                ,lazyInit: false
-                ,width: 50
-                ,maskRe: /[0-9]/
-                ,store: [10, 20, 50, 100, 'all']
-                ,listeners: {
-                    render: function(combo) {
-                        combo.setValue(pagebar.pageSize);
-                    }
-                    ,select: function(combo) {
-                        pagebar.pageSize = parseInt(combo.getRawValue(), 10);
-                        pagebar.doLoad(pagebar.cursor);
-                    }
-                    ,specialkey: function(combo, e) {
-                        if (e.getKey() == 13) {
-                            pagebar.pageSize = parseInt(combo.getRawValue(), 10) || 'all';
-                            combo.setValue(pagebar.pageSize);
-                            pagebar.doLoad(pagebar.cursor);
-                        }
-                    }
-                }
-            }
-            ,'-' ,{
+    var toolbar = new Ext.Toolbar({
+        id: 'toolbar'
+        ,items: [
+            {
                 text: 'Clear Filters'
                 ,cls: 'x-btn-text-icon'
                 ,icon: '[% c.req.base %]image/bin_closed.png'
@@ -139,7 +101,7 @@
                     pagebar.doLoad(pagebar.cursor);
                 }
             }
-            ,'-' ,{
+            ,'->' ,{
                 text: 'Add New [% lf.main.title %]'
                 ,cls: 'x-btn-text-icon'
                 ,icon: '[% c.req.base %]/image/add.png'
@@ -147,6 +109,50 @@
                     // draw the window!
                     var win = generate_win();
                     win.show(this);
+                }
+            }
+        ]
+    });
+
+    var pagebar = new Ext.PagingToolbar({
+        id: 'pagebar'
+        ,pageSize: 10
+        ,store: store
+        ,displayInfo: true
+        ,listeners: {
+            // fudge for the Rows selector below, when it selects 0 or 'all'
+            enable: function() {
+                if ((pagebar.pageSize == 0) || isNaN(pagebar.pageSize)) {
+                    pagebar.pageSize = pagebar.store.data.length;
+                    pagebar.updateInfo();
+                }
+            }
+        }
+        ,items: [
+            '-' ,'Rows:' ,' ' ,{
+                xtype: 'combo'
+                ,mode: 'local'
+                ,allowBlank: false
+                ,triggerAction: 'all'
+                ,lazyInit: false
+                ,width: 50
+                ,maskRe: /[0-9]/
+                ,store: [10, 20, 50, 100, 'all']
+                ,listeners: {
+                    render: function(combo) {
+                        combo.setValue(pagebar.pageSize);
+                    }
+                    ,select: function(combo) {
+                        pagebar.pageSize = parseInt(combo.getRawValue(), 10);
+                        pagebar.doLoad(pagebar.cursor);
+                    }
+                    ,specialkey: function(combo, e) {
+                        if (e.getKey() == 13) {
+                            pagebar.pageSize = parseInt(combo.getRawValue(), 10) || 'all';
+                            combo.setValue(pagebar.pageSize);
+                            pagebar.doLoad(pagebar.cursor);
+                        }
+                    }
                 }
             }
             ,'-' ,'Go to:' ,' ' ,{
@@ -287,6 +293,7 @@
             }
         }
         ,selModel: new Ext.grid.RowSelectionModel // req'd to deselect row
+        ,tbar: toolbar
         ,bbar: pagebar
         ,viewConfig: new Ext.grid.GridView({
             autoFill: true
