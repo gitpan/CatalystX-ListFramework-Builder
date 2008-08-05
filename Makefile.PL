@@ -13,8 +13,6 @@ WriteMakefile(
         Catalyst::View::JSON => 0,
         Catalyst::View::TT => 0,
         Class::C3 => 0,
-        Class::Data::Inheritable => 0,
-        List::MoreUtils => 0,
     },
 
     ($] >= 5.005 ?     ## Add these new keywords supported since 5.005

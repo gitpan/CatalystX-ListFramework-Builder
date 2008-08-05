@@ -3,7 +3,7 @@ package CatalystX::ListFramework::Builder;
 use strict;
 use warnings FATAL => 'all';
 
-our $VERSION = 0.14;
+our $VERSION = 0.15;
 
 sub build_listframework {
     my ($class, $config) = @_;
@@ -61,7 +61,7 @@ CatalystX::ListFramework::Builder - Instant AJAX web front-end for DBIx::Class, 
 
 =head1 VERSION
 
-This document refers to version 0.14 of CatalystX::ListFramework::Builder
+This document refers to version 0.15 of CatalystX::ListFramework::Builder
 
 =head1 WARNING
 
@@ -230,6 +230,25 @@ Presumably the location of the Catalyst application created in the previous
 section maps to a particular URL path. Follow this path with the name of a
 table in the database, and you should be presented with a table of data.
 
+=head1 EXAMPLES
+
+There is an C<examples> directory included with this distribution which
+includes the files necessary to set up a small demo application with SQLite3.
+
+=head1 LIMITATIONS
+
+=over 4
+
+=item Single column primary key
+
+There's no support for multiple column primary keys (composite/compound
+keys). This has saved a lot of time in development because it greatly
+simplifies the L<Catalyst> and L<DBIx::Class> code. However if you're
+desperate for this feature, drop me a line because you might be able to buy
+some of my time to do the work required.
+
+=back
+
 =head1 REQUIREMENTS
 
 =over 4
@@ -257,14 +276,6 @@ Catalyst::View::TT
 =item *
 
 Class::C3
-
-=item *
-
-Class::Data::Inheritable
-
-=item *
-
-List::MoreUtils
 
 =back
 

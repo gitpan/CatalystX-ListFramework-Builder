@@ -8,10 +8,6 @@ use base 'Catalyst::Component';
 use List::Util qw(first);
 use Scalar::Util qw(weaken);
 
-my %extra_for = (
-    datefield => q{,format: 'Y-m-d'},
-);
-
 my %xtype_for = (
     boolean => 'checkbox',
 );
@@ -124,14 +120,8 @@ sub _build_table_info {
         $ti->{cols}->{$col}->{default_value} = $info->{default_value}
             if $info->{default_value} and $ti->{cols}->{$col}->{editable};
 
-        if (exists $xtype_for{ $info->{data_type} }) {
-            $ti->{cols}->{$col}->{extjs_xtype}
-                = $xtype_for{ $info->{data_type} };
-
-            $ti->{cols}->{$col}->{extjs_xtype_extra}
-                = $extra_for{ $ti->{cols}->{$col}->{extjs_xtype} }
-                if exists $extra_for{ $ti->{cols}->{$col}->{extjs_xtype} };
-        }
+        $ti->{cols}->{$col}->{extjs_xtype} = $xtype_for{ $info->{data_type} }
+            if exists $xtype_for{ $info->{data_type} };
     }
 
     # extra data for foreign key columns

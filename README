@@ -3,7 +3,7 @@ NAME
     DBIx::Class, using Catalyst
 
 VERSION
-    This document refers to version 0.14 of
+    This document refers to version 0.15 of
     CatalystX::ListFramework::Builder
 
 WARNING
@@ -167,6 +167,20 @@ USAGE
     the name of a table in the database, and you should be presented with a
     table of data.
 
+EXAMPLES
+    There is an "examples" directory included with this distribution which
+    includes the files necessary to set up a small demo application with
+    SQLite3.
+
+LIMITATIONS
+    Single column primary key
+        There's no support for multiple column primary keys
+        (composite/compound keys). This has saved a lot of time in
+        development because it greatly simplifies the Catalyst and
+        DBIx::Class code. However if you're desperate for this feature, drop
+        me a line because you might be able to buy some of my time to do the
+        work required.
+
 REQUIREMENTS
     *   ExtJS Javascript Library version 2.1 or later, from
         <http://extjs.com>.
@@ -180,10 +194,6 @@ REQUIREMENTS
     *   Catalyst::View::TT
 
     *   Class::C3
-
-    *   Class::Data::Inheritable
-
-    *   List::MoreUtils
 
 SEE ALSO
     CatalystX::ListFramework is similar but has no dependency on Javascript
