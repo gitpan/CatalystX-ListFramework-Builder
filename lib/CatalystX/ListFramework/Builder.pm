@@ -3,7 +3,7 @@ package CatalystX::ListFramework::Builder;
 use strict;
 use warnings FATAL => 'all';
 
-our $VERSION = 0.15;
+our $VERSION = 0.16;
 
 sub build_listframework {
     my ($class, $config) = @_;
@@ -42,7 +42,15 @@ sub build_listframework {
     # this is done in the caller's namespace
     eval "package ${caller};
           use base 'CatalystX::ListFramework::Builder::Base';
-          ${caller}->config( file => '$config' );
+
+          require Catalyst::Plugin::ConfigLoader;
+          if (\$Catalyst::Plugin::ConfigLoader::VERSION >= 0.20 ) {
+              ${caller}->config( 'Plugin::ConfigLoader' => { file => '$config' } );
+          }
+          else {
+              ${caller}->config( file => '$config' );
+          }
+
           ${caller}->setup;
           1;
     ";
@@ -61,7 +69,7 @@ CatalystX::ListFramework::Builder - Instant AJAX web front-end for DBIx::Class, 
 
 =head1 VERSION
 
-This document refers to version 0.15 of CatalystX::ListFramework::Builder
+This document refers to version 0.16 of CatalystX::ListFramework::Builder
 
 =head1 WARNING
 

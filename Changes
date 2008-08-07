@@ -1,3 +1,9 @@
+libcatalystx-listframework-builder (0.16) UNRELEASED; urgency=low
+
+  * Fix to help people using ConfigLoader plugin >= 0.20 
+
+ -- Oliver Gorwits <oliver.gorwits@oucs.ox.ac.uk>  Thu,  7 Aug 2008 13:14:20 +0100
+
 libcatalystx-listframework-builder (0.15) UNRELEASED; urgency=low
 
   * Stop fiddling linebreaks in TT - will come back to this one
