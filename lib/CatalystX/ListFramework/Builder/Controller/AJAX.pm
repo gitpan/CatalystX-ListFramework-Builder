@@ -254,8 +254,9 @@ sub _process_row_stack {
 
         # update or create the row; could this use a magic DBIC method?
         my $pk = $lf->{table_info}->{$model}->{pk};
-        my $row = ( (exists $data->{ $pk } and $data->{ $pk })
-            ? $c->model($model)->find( $data->{ $pk } )->set_columns( $data )
+        my $row = eval { $c->model($model)->find( $data->{ $pk } ) };
+        $row = ( (blessed $row)
+            ? $row->set_columns( $data )
             : $c->model($model)->new_result( $data ) );
 
         $row->update_or_insert;

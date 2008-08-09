@@ -3,13 +3,8 @@ NAME
     DBIx::Class, using Catalyst
 
 VERSION
-    This document refers to version 0.16 of
+    This document refers to version 0.17 of
     CatalystX::ListFramework::Builder
-
-WARNING
-    This is an *ALPHA RELEASE*. I'd really appreciate any bug reports; you
-    can use the CPAN RT bug tracking system, or email me (Oliver) directly
-    at the address at the bottom of this page.
 
 PURPOSE
     You have a database schema available through DBIx::Class, and wish to
@@ -18,12 +13,6 @@ PURPOSE
 
     This module, with only a few lines of configuration, is able to create
     such interfaces on the fly. They are a bit whizzy and all Web 2.0-ish.
-
-ACKNOWLEDGEMENTS
-    Without the initial work on "CatalystX::ListFramework" by Andrew Payne
-    and Peter Edwards this package would not exist. If you are looking for
-    something like this module but without the dependency on Javascript,
-    please do check out CatalystX::ListFramework.
 
 SYNOPSIS
     A configuration file somewhere on your system:
@@ -199,6 +188,12 @@ SEE ALSO
     CatalystX::ListFramework is similar but has no dependency on Javascript
     (though it can use it for fancy auto-complete searches), and it also
     allows you to control which columns are rendered in the display.
+
+ACKNOWLEDGEMENTS
+    Without the initial work on "CatalystX::ListFramework" by Andrew Payne
+    and Peter Edwards this package would not exist. If you are looking for
+    something like this module but without the dependency on Javascript,
+    please do check out CatalystX::ListFramework.
 
 AUTHOR
     Oliver Gorwits "<oliver.gorwits@oucs.ox.ac.uk>"
