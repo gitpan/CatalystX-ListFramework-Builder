@@ -10,7 +10,6 @@ examples/test_app.sql
 examples/config.yml
 examples/ListFrameworkUser.pm
 examples/bootstrap_sqlite.pl
-lib/CatalystX/ListFramework/Builder/Base.pm
 lib/CatalystX/ListFramework/Builder/images/magnifier.png
 lib/CatalystX/ListFramework/Builder/images/bullet_red.png
 lib/CatalystX/ListFramework/Builder/images/bin_closed.png

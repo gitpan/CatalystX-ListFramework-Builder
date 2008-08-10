@@ -3,7 +3,10 @@ package CatalystX::ListFramework::Builder;
 use strict;
 use warnings FATAL => 'all';
 
-our $VERSION = 0.17;
+use Catalyst;
+use Devel::InnerPackage qw/list_packages/;
+
+our $VERSION = 0.18;
 
 sub build_listframework {
     my ($class, $config) = @_;
@@ -20,41 +23,52 @@ sub build_listframework {
         View::TT
     );
 
-    foreach my $p (@packages) {
-        my $component = "${caller}::${p}";
-
-        # require will shortcircuit and return true if the component is
-        # already loaded
-        if (! eval "package $caller; require $component;") {
-            # make a component on the fly in the App namespace
-            eval "package $component;
-                  use base qw(CatalystX::ListFramework::Builder::${p}); 1;
-            ";
-            die $@ if $@;
-
-            # inject entry to %INC so Perl knows this component is loaded
-            (my $file = "$component.pm") =~ s{::}{/}g;
-            $INC{$file} = 'loaded';
+    # user passes config filename or config hashref
+    if ($config) {
+        if (ref $config) {
+            $caller->config( $config );
+        }
+        else {
+            $caller->config( 'Plugin::ConfigLoader' => { file => $config } );
+            $caller->setup_plugins(['ConfigLoader']);
         }
     }
 
-    # now load the main catalyst app, passing through our config file
-    # this is done in the caller's namespace
-    eval "package ${caller};
-          use base 'CatalystX::ListFramework::Builder::Base';
+    # need to setup Catalyst before adding components from inside 'PACKAGE'
+    $caller->setup;
 
-          require Catalyst::Plugin::ConfigLoader;
-          if (\$Catalyst::Plugin::ConfigLoader::VERSION >= 0.20 ) {
-              ${caller}->config( 'Plugin::ConfigLoader' => { file => '$config' } );
-          }
-          else {
-              ${caller}->config( file => '$config' );
-          }
+    PACKAGE:
+    foreach my $p (@packages) {
+        my $comp = "${caller}::${p}";
 
-          ${caller}->setup;
-          1;
-    ";
-    die $@ if $@;
+        # require will shortcircuit and return true if the component is
+        # already loaded
+        unless (eval "package $caller; require $comp;") {
+
+            # make a component on the fly in the App namespace
+            eval qq(
+                package $comp;
+                use base qw/CatalystX::ListFramework::Builder::${p}/;
+                1;
+            );
+            die $@ if $@;
+
+            # inject entry to %INC so Perl knows this component is loaded
+            # this is just for politeness and does not aid Catalyst
+            (my $file = "$comp.pm") =~ s{::}{/}g;
+            $INC{$file} = 'loaded';
+
+            #  add newly created components to catalyst
+            #  must set up component and -then- call list_packages on it
+            $caller->components->{$comp} = $caller->setup_component($comp);
+            for my $m (list_packages($comp)) {
+                $caller->components->{$m} = $caller->setup_component($m);
+            }
+        }
+    }
+
+    # need to setup actions, again
+    $caller->setup_actions;
 
     return 1;
 }
@@ -70,7 +84,7 @@ DBIx::Class, using Catalyst
 
 =head1 VERSION
 
-This document refers to version 0.17 of CatalystX::ListFramework::Builder
+This document refers to version 0.18 of CatalystX::ListFramework::Builder
 
 =head1 PURPOSE
 

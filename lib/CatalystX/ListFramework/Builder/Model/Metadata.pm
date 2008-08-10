@@ -12,7 +12,7 @@ my %xtype_for = (
     boolean => 'checkbox',
 );
 
-map {$xtype_for{$_} = 'numberfield'} (
+$xtype_for{$_} = 'numberfield' for (
     'bigint',
     'bigserial',
     'decimal',
@@ -25,13 +25,13 @@ map {$xtype_for{$_} = 'numberfield'} (
     'serial',
 );
 
-map {$xtype_for{$_} = 'timefield'} (
+$xtype_for{$_} = 'timefield' for ( 
     'time',
     'time without time zone',
     'time with time zone',
 );
 
-map {$xtype_for{$_} = 'datefield'} (
+$xtype_for{$_} = 'datefield' for (
     'date',
     'timestamp',
     'timestamp without time zone',
@@ -173,7 +173,7 @@ sub _moniker2model {
 }
 
 sub _qualify2package {
-    return join '::', map { join '', split /[\W_]+/, lc } @_;
+    return join '::', map { join '', map ucfirst, split /[\W_]+/, lc } @_;
         # from DBIx::Class::Schema::Loader::Base::_table2moniker
 }
 
