@@ -1,3 +1,11 @@
+libcatalystx-listframework-builder (0.19) UNRELEASED; urgency=low
+
+  * Change system to be a Catalyst Plugin on the recommendation of mst
+  * Small tweaks to controller action suggested by jhthorsen
+  * POD updates to use Config::General rather than YAML (again, thanks mst)
+
+ -- Oliver Gorwits <oliver.gorwits@oucs.ox.ac.uk>  Tue, 12 Aug 2008 23:31:42 +0100
+
 libcatalystx-listframework-builder (0.18) UNRELEASED; urgency=low
 
   * Some great input from jhthorsen helped refactor the bootstrapping

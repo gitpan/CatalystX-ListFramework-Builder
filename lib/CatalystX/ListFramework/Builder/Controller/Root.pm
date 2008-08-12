@@ -26,8 +26,7 @@ sub default :Private {
 
 sub end :Private {
     my ($self, $c) = @_;
-    return if $c->res->output or ($c->res->status == 304);
-    $c->detach('JSON');
+    $c->detach('JSON') if $c->stash->{json_data};
 }
 
 sub err_message :Private {

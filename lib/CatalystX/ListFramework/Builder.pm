@@ -3,14 +3,14 @@ package CatalystX::ListFramework::Builder;
 use strict;
 use warnings FATAL => 'all';
 
-use Catalyst;
+use Class::C3;
 use Devel::InnerPackage qw/list_packages/;
 
-our $VERSION = 0.18;
+our $VERSION = 0.19;
 
-sub build_listframework {
-    my ($class, $config) = @_;
-    my $caller = scalar caller;
+sub setup_components {
+    my $class = shift;
+    $class->next::method(@_);
 
     # these are the boilerplate Catalyst components for ListFramework
     my @packages = qw(
@@ -23,27 +23,12 @@ sub build_listframework {
         View::TT
     );
 
-    # user passes config filename or config hashref
-    if ($config) {
-        if (ref $config) {
-            $caller->config( $config );
-        }
-        else {
-            $caller->config( 'Plugin::ConfigLoader' => { file => $config } );
-            $caller->setup_plugins(['ConfigLoader']);
-        }
-    }
-
-    # need to setup Catalyst before adding components from inside 'PACKAGE'
-    $caller->setup;
-
-    PACKAGE:
     foreach my $p (@packages) {
-        my $comp = "${caller}::${p}";
+        my $comp = "${class}::${p}";
 
         # require will shortcircuit and return true if the component is
         # already loaded
-        unless (eval "package $caller; require $comp;") {
+        unless (eval "package $class; require $comp;") {
 
             # make a component on the fly in the App namespace
             eval qq(
@@ -60,15 +45,12 @@ sub build_listframework {
 
             #  add newly created components to catalyst
             #  must set up component and -then- call list_packages on it
-            $caller->components->{$comp} = $caller->setup_component($comp);
+            $class->components->{$comp} = $class->setup_component($comp);
             for my $m (list_packages($comp)) {
-                $caller->components->{$m} = $caller->setup_component($m);
+                $class->components->{$m} = $class->setup_component($m);
             }
         }
     }
-
-    # need to setup actions, again
-    $caller->setup_actions;
 
     return 1;
 }
@@ -84,7 +66,13 @@ DBIx::Class, using Catalyst
 
 =head1 VERSION
 
-This document refers to version 0.18 of CatalystX::ListFramework::Builder
+This document refers to version 0.19 of CatalystX::ListFramework::Builder
+
+=head1 WARNING
+
+This is an I<ALPHA RELEASE>. I'd really appreciate any bug reports; you can
+use the CPAN RT bug tracking system, or email me (Oliver) directly at the
+address at the bottom of this page.
 
 =head1 PURPOSE
 
@@ -99,26 +87,28 @@ interfaces on the fly. They are a bit whizzy and all Web 2.0-ish.
 
 A configuration file somewhere on your system:
 
- --- #YAML:1.0
- # (/path/to/listframeworkuser/config.yml)
- base: "http://mywebserver.example.com"
- javascript: "/javascript/extjs-2"
+ # Config::General formal
+ # [listframeworkuser.conf] in Config::General format
  
- Model::DBIC:
-   schema_class: My::Database::Schema
-   connect_info:
-     - 'dbi:Pg:dbname=mydbname;host=mydbhost.example.com;'
-     - 'username'
-     - 'password'
-     - { AutoCommit: 1 }
+ base         http://mywebserver.example.com
+ javascript   /javascript/extjs-2
+ 
+ <Model::DBIC>
+     schema_class   My::Database::Schema
+     connect_info   dbi:Pg:dbname=mydbname;host=mydbhost.example.com;
+     connect_info   username
+     connect_info   password
+     <connect_info>
+         AutoCommit   1
+     </connect_info>
+ </Model::DBIC>
 
 And in the cgi-bin area of your web server:
 
  package ListFrameworkUser;
- use base 'CatalystX::ListFramework::Builder';
+ use Catalyst qw(ConfigLoader +CatalystX::ListFramework::Builder);
  
- __PACKAGE__->build_listframework('/path/to/listframeworkuser/config.yml');
- 
+ __PACKAGE__->setup;
  1;
 
 Now going to C<http://mywebserver.example.com/cgi-bin/tablename> will render
@@ -164,6 +154,8 @@ your Perl Include path.
 
 =head2 C<DBIx::Class> helpers
 
+NB: THE STRINGIFICATION HERE IS DEPRECATED - MORE DETAILS IN THE NEXT RELEASE.
+
 You I<really> should add some stringification to these C<DBIx::Class> schema
 otherwise the web interface will contain strange data. Add a stringify routine
 to the bottom of each schema file; something like this:
@@ -194,17 +186,17 @@ will be needed in the application configuration file, below.
 
 Create the application configuration file, an example of which is below:
 
- --- #YAML:1.0
- base: "http://mywebserver.example.com"
- javascript: "/javascript/extjs-2"
- 
- Model::DBIC:
-   schema_class: My::Database::Schema
-   connect_info:
-     - 'dbi:Pg:dbname=mydbname;host=mydbhost.example.com;'
-     - 'username'
-     - 'password'
-     - { AutoCommit: 1 }
+ base         http://mywebserver.example.com
+ javascript   /javascript/extjs-2
+ <Model::DBIC>
+     schema_class   My::Database::Schema
+     connect_info   dbi:Pg:dbname=mydbname;host=mydbhost.example.com;
+     connect_info   username
+     connect_info   password
+     <connect_info>
+         AutoCommit   1
+     </connect_info>
+ </Model::DBIC>
 
 The application needs to know where your copy of ExtJS (version 2.1 or later)
 is, on the web server. Use the C<javascript> option as shown above to specify
@@ -224,15 +216,21 @@ bootstrap a Catalyst application around your database. Locate on your web
 server the area where Perl content is executed, and create a file as below:
 
  package ListFrameworkUser;
- use base 'CatalystX::ListFramework::Builder';
+ use Catalyst qw(ConfigLoader +CatalystX::ListFramework::Builder);
  
- __PACKAGE__->build_listframework('/path/to/listframeworkuser/config.yml');
- 
+ __PACKAGE__->setup;
  1;
 
-Obviously, replace the path there with that of the configuration file you
-created in the previous section. Let your web server know that this file is to
-be executed for any request which comes to its location.
+Let your web server know that this file is to be executed for any request
+which comes to its location.
+
+If necessary, you'll need to let the C<ConfigLoader> plugin know of the
+whereabouts of your application configuration file. See the
+L<Catalyst::Plugin::ConfigLoader> documentation for more details, although
+here is a brief example of the change required:
+
+ __PACKAGE__->config( 'Plugin::ConfigLoader' => { file => 'myapp.conf' } );
+ __PACKAGE__->setup;
 
 =head2 Accessing the application from your browser
 

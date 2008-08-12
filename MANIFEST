@@ -7,7 +7,7 @@ META.yml
 INSTALL
 t/00-load.t
 examples/test_app.sql
-examples/config.yml
+examples/listframeworkuser.conf
 examples/ListFrameworkUser.pm
 examples/bootstrap_sqlite.pl
 lib/CatalystX/ListFramework/Builder/images/magnifier.png
