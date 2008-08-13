@@ -3,8 +3,13 @@ NAME
     DBIx::Class, using Catalyst
 
 VERSION
-    This document refers to version 0.17 of
+    This document refers to version 0.21 of
     CatalystX::ListFramework::Builder
+
+WARNING
+    This is an *ALPHA RELEASE*. I'd really appreciate any bug reports; you
+    can use the CPAN RT bug tracking system, or email me (Oliver) directly
+    at the address at the bottom of this page.
 
 PURPOSE
     You have a database schema available through DBIx::Class, and wish to
@@ -17,26 +22,28 @@ PURPOSE
 SYNOPSIS
     A configuration file somewhere on your system:
 
-     --- #YAML:1.0
-     # (/path/to/listframeworkuser/config.yml)
-     base: "http://mywebserver.example.com"
-     javascript: "/javascript/extjs-2"
+     # Config::General formal
+     # [listframeworkuser.conf] in Config::General format
  
-     Model::DBIC:
-       schema_class: My::Database::Schema
-       connect_info:
-         - 'dbi:Pg:dbname=mydbname;host=mydbhost.example.com;'
-         - 'username'
-         - 'password'
-         - { AutoCommit: 1 }
+     base         http://mywebserver.example.com
+     javascript   /javascript/extjs-2
+ 
+     <Model::DBIC>
+         schema_class   My::Database::Schema
+         connect_info   dbi:Pg:dbname=mydbname;host=mydbhost.example.com;
+         connect_info   username
+         connect_info   password
+         <connect_info>
+             AutoCommit   1
+         </connect_info>
+     </Model::DBIC>
 
     And in the cgi-bin area of your web server:
 
      package ListFrameworkUser;
-     use base 'CatalystX::ListFramework::Builder';
+     use Catalyst qw(ConfigLoader +CatalystX::ListFramework::Builder);
  
-     __PACKAGE__->build_listframework('/path/to/listframeworkuser/config.yml');
- 
+     __PACKAGE__->setup;
      1;
 
     Now going to "http://mywebserver.example.com/cgi-bin/tablename" will
@@ -79,23 +86,47 @@ USAGE
     into your Perl Include path.
 
   "DBIx::Class" helpers
-    You *really* should add some stringification to these "DBIx::Class"
-    schema otherwise the web interface will contain strange data. Add a
-    stringify routine to the bottom of each schema file; something like
-    this:
+    When the web interface wants to display a column which references
+    another table, you can make things look much better by adding a custom
+    render method to your "DBIx::Class" Result Sources (i.e. the class files
+    for each table).
+
+    First, the application will look for a method called "display_name" and
+    use that. Here is an example which could be added to your Result Source
+    classes below the line which reads *DO NOT MODIFY THIS OR ANYTHING
+    ABOVE*, and in this case returns the data from the "title" column:
+
+     sub display_name {
+         my $self = shift;
+         return $self->title || '';
+     }
+
+    Failing the existence of a "display_name" method, the application
+    attempts to stringify the row object. Using stringification is not
+    recommended, although some people like it. Here is an example of a
+    stringification handler:
 
      use overload '""' => sub {
          my $self = shift;
-         return $self->title;
+         return $self->title || '';
      }, fallback => 1;
 
-    In this example the row stringifies to the "title" column but you can of
-    course return anything you wish.
+    If all else fails the application prints the best hint it can to
+    describe the foreign row. This is something approximating the name of
+    the foreign table, the names of the primary keys, and associated values.
+    It's better than stringifying the object the way Perl does, anyway.
 
-    Also, for those columns where your database uses an auto-incremented
-    value, add the "is_auto_increment => 1," option to the relevant hash in
-    add_columns(). This will let the application know you don't need to
-    supply a value for new or updated records.
+    One other very important tip: for those columns where your database uses
+    an auto-incremented value, add the "is_auto_increment => 1," option to
+    the relevant hash in add_columns(). This will let the application know
+    you don't need to supply a value for new or updated records. The
+    interface will look much better as a result.
+
+    Finally, buried within one of the modules in this application are some
+    filters, which are applied to data of certain types as it enters or
+    leaves the database. If you find a particular data type is not being
+    rendered correctly, please drop the author a line at the email address
+    below, explaining what you'd like to see instead.
 
   Download and install ExtJS
     You'll need to download the ExtJS Javascript Library (version 2.1 or
@@ -110,17 +141,17 @@ USAGE
   Application configuration file
     Create the application configuration file, an example of which is below:
 
-     --- #YAML:1.0
-     base: "http://mywebserver.example.com"
-     javascript: "/javascript/extjs-2"
- 
-     Model::DBIC:
-       schema_class: My::Database::Schema
-       connect_info:
-         - 'dbi:Pg:dbname=mydbname;host=mydbhost.example.com;'
-         - 'username'
-         - 'password'
-         - { AutoCommit: 1 }
+     base         http://mywebserver.example.com
+     javascript   /javascript/extjs-2
+     <Model::DBIC>
+         schema_class   My::Database::Schema
+         connect_info   dbi:Pg:dbname=mydbname;host=mydbhost.example.com;
+         connect_info   username
+         connect_info   password
+         <connect_info>
+             AutoCommit   1
+         </connect_info>
+     </Model::DBIC>
 
     The application needs to know where your copy of ExtJS (version 2.1 or
     later) is, on the web server. Use the "javascript" option as shown above
@@ -140,15 +171,21 @@ USAGE
     below:
 
      package ListFrameworkUser;
-     use base 'CatalystX::ListFramework::Builder';
+     use Catalyst qw(ConfigLoader +CatalystX::ListFramework::Builder);
  
-     __PACKAGE__->build_listframework('/path/to/listframeworkuser/config.yml');
- 
+     __PACKAGE__->setup;
      1;
 
-    Obviously, replace the path there with that of the configuration file
-    you created in the previous section. Let your web server know that this
-    file is to be executed for any request which comes to its location.
+    Let your web server know that this file is to be executed for any
+    request which comes to its location.
+
+    If necessary, you'll need to let the "ConfigLoader" plugin know of the
+    whereabouts of your application configuration file. See the
+    Catalyst::Plugin::ConfigLoader documentation for more details, although
+    here is a brief example of the change required:
+
+     __PACKAGE__->config( 'Plugin::ConfigLoader' => { file => 'myapp.conf' } );
+     __PACKAGE__->setup;
 
   Accessing the application from your browser
     Presumably the location of the Catalyst application created in the

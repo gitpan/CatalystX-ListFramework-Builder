@@ -1,0 +1,99 @@
+<body>
+
+    <script type="text/javascript">
+        <!--
+        function toggleDump (dumpElement) {
+            var e = document.getElementById( dumpElement );
+            if (e.style.display == "none") {
+                e.style.display = "";
+            }
+            else {
+                e.style.display = "none";
+            }
+        }
+        -->
+    </script>
+    <style type="text/css">
+        body {
+            font-family: "Bitstream Vera Sans", "Trebuchet MS", Verdana,
+                         Tahoma, Arial, helvetica, sans-serif;
+            color: #333;
+            background-color: #eee;
+            margin: 0px;
+            padding: 0px;
+        }
+        :link, :link:hover, :visited, :visited:hover {
+            color: #000;
+        }
+        div.box {
+            position: relative;
+            background-color: #ccc;
+            border: 1px solid #aaa;
+            padding: 4px;
+            margin: 10px;
+        }
+        div.error {
+            background-color: #cce;
+            border: 1px solid #755;
+            padding: 8px;
+            margin: 4px;
+            margin-bottom: 10px;
+        }
+        div.infos {
+            background-color: #eee;
+            border: 1px solid #575;
+            padding: 8px;
+            margin: 4px;
+            margin-bottom: 10px;
+        }
+        div.name {
+            background-color: #cce;
+            border: 1px solid #557;
+            padding: 8px;
+            margin: 4px;
+        }
+        code.error {
+            display: block;
+            margin: 1em 0;
+            overflow: auto;
+        }
+        div.name h1, div.error p {
+            margin: 0;
+        }
+        h2 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: medium;
+            font-weight: bold;
+            text-decoration: underline;
+        }
+        h1 {
+            font-size: medium;
+            font-weight: normal;
+        }
+        /* from http://users.tkk.fi/~tkarvine/linux/doc/pre-wrap/pre-wrap-css3-mozilla-opera-ie.html */
+        /* Browser specific (not valid) styles to make preformatted text wrap */
+        pre { 
+            white-space: pre-wrap;       /* css-3 */
+            white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+            white-space: -pre-wrap;      /* Opera 4-6 */
+            white-space: -o-pre-wrap;    /* Opera 7 */
+            word-wrap: break-word;       /* Internet Explorer 5.5+ */
+        }
+    </style>
+<div class="box">
+        <div class="error">
+Sorry, the table name is either missing, or wasn't recognised. 
+Please click on one of the tables below...
+        </div>
+        <div class="infos">
+<ul>
+[% FOREACH table IN lf.table2path.keys.sort %]
+<li><a href="[% c.req.base %][% lf.table2path.item(table) %]">[% table %]</a></li>
+[% END %]
+</ul>
+</div>
+        <div class="name">[% title %]</div>
+    </div>
+
+</body>

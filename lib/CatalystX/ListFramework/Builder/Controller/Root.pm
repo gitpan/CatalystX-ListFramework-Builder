@@ -16,8 +16,10 @@ sub begin :Private {
 
 sub default :Private {
     my ($self, $c, $table) = @_;
-    $c->detach('err_message') if !defined $c->stash->{lf};
+
     $c->stash->{version} = $CatalystX::ListFramework::Builder::VERSION;
+    $c->detach('err_message') if !defined $c->stash->{lf}->{model};
+
     $c->stash->{template} = 'list-and-search.tt';
     $c->stash->{title} = $c->stash->{lf}->{main}->{title}
         .' List - powered by LFB v'. $c->stash->{version};
@@ -31,7 +33,9 @@ sub end :Private {
 
 sub err_message :Private {
     my ($self, $c) = @_;
-    $c->res->output('Missing or unrecognized table name!');
+    $c->stash->{template} = 'tables.tt';
+    $c->stash->{title} = 'Powered by LFB v'. $c->stash->{version};
+    $c->detach('TT');
 }
 
 sub helloworld :Path('/helloworld') {

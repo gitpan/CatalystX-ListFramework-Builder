@@ -1,3 +1,11 @@
+libcatalystx-listframework-builder (0.21) UNRELEASED; urgency=low
+
+  * Now print more useful error on missing/unknown table w/ links to tables
+  * Text in delete column is more useful (refs PK val) rather than "Delete"
+  * Deprecate stringify in favour of display_name
+
+ -- Oliver Gorwits <oliver.gorwits@oucs.ox.ac.uk>  Thu, 14 Aug 2008 00:13:29 +0100
+
 libcatalystx-listframework-builder (0.19) UNRELEASED; urgency=low
 
   * Change system to be a Catalyst Plugin on the recommendation of mst

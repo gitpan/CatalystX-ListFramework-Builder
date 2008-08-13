@@ -59,8 +59,9 @@
             ,renderer: function (value,metadata,record,rowindex,colindex,store) {
                 if (value == '(click to add filter)') { return '' }
                 else {
+                    metadata.css += 'half-grey-pointer';
                     return '<img src="[% c.req.base %]/image/bin_closed.png"/>'
-                        + ' Delete';
+                        + ' [% lf.main.pk %](' + record.get('[% lf.main.pk %]') + ')';
                 }
             }
         }
@@ -178,10 +179,56 @@
         ]
     });
 
+//    Ext.override(Ext.grid.GridView, {
+//        layout : function(){
+//            if(!this.mainBody){
+//                return; // not rendered
+//            }
+//            var g = this.grid;
+//            var c = g.getGridEl();
+//            var csize = c.getSize(true);
+//            var vw = csize.width;
+//    
+//            if(vw < 20 || csize.height < 20){ // display: none?
+//                return;
+//            }
+//    
+//            if(g.autoHeight){
+//                if(g.maxHeight){
+//                    this.el.setSize(vw, g.maxHeight);
+//                    var hdHeight = this.mainHd.getHeight();
+//                    var vh = g.maxHeight - (hdHeight);
+//                    this.scroller.setSize(vw, vh);
+//                }else{
+//                    this.scroller.dom.style.overflow = 'visible';
+//                }
+//            }else{
+//                this.el.setSize(csize.width, csize.height);
+//    
+//                var hdHeight = this.mainHd.getHeight();
+//                var vh = csize.height - (hdHeight);
+//    
+//                this.scroller.setSize(vw, vh);
+//                if(this.innerHd){
+//                    this.innerHd.style.width = (vw)+'px';
+//                }
+//            }
+//            if(this.forceFit){
+//                if(this.lastViewWidth != vw){
+//                    this.fitColumns(false, false);
+//                    this.lastViewWidth = vw;
+//                }
+//            }else {
+//                this.autoExpand();
+//                this.syncHeaderScroll();
+//            }
+//            this.onLayout(vw, vh);
+//        }
+//    });
+
     var grid = new Ext.grid.EditorGridPanel({
         id: 'search-grid'
         ,el: 'list-grid'
-        // ,width: 900
         ,autoHeight: true
         ,stripeRows: true
         ,title: '[% title %]'
@@ -213,7 +260,7 @@
                     var data = rec.get('[% lf.main.pk %]');
                     Ext.MessageBox.confirm (
                         'Confirm Delete [% lf.main.title %]'
-                        ,'Are you sure you want to delete [% lf.main.title %] "' + data + '"?'
+                        ,'Are you sure you want to delete [% lf.main.title %] [% lf.main.pk %](' + data + ')?'
                         ,function (btn) {
                             if (btn == 'yes') {
                                 grid.loadMask.el.mask();
@@ -297,7 +344,7 @@
         ,bbar: pagebar
         ,viewConfig: new Ext.grid.GridView({
             autoFill: true
-            ,fiorceFit: true
+            ,forceFit: true
             ,scrollOffset: 0
             ,getRowClass: function (record, index) {
                 if (pagebar.disabled == true && index == 0) {

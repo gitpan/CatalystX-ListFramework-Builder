@@ -24,6 +24,7 @@ lib/CatalystX/ListFramework/Builder/templates/wrapper.tt
 lib/CatalystX/ListFramework/Builder/templates/javascript/form.tt
 lib/CatalystX/ListFramework/Builder/templates/javascript/grid.tt
 lib/CatalystX/ListFramework/Builder/templates/javascript/store.tt
+lib/CatalystX/ListFramework/Builder/templates/tables.tt
 lib/CatalystX/ListFramework/Builder/templates/style.tt
 lib/CatalystX/ListFramework/Builder/templates/list-and-search.tt
 lib/CatalystX/ListFramework/Builder/templates/list.tt

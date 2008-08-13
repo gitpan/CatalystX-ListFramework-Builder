@@ -6,7 +6,7 @@ use warnings FATAL => 'all';
 use Class::C3;
 use Devel::InnerPackage qw/list_packages/;
 
-our $VERSION = 0.19;
+our $VERSION = 0.21;
 
 sub setup_components {
     my $class = shift;
@@ -66,7 +66,7 @@ DBIx::Class, using Catalyst
 
 =head1 VERSION
 
-This document refers to version 0.19 of CatalystX::ListFramework::Builder
+This document refers to version 0.21 of CatalystX::ListFramework::Builder
 
 =head1 WARNING
 
@@ -154,24 +154,45 @@ your Perl Include path.
 
 =head2 C<DBIx::Class> helpers
 
-NB: THE STRINGIFICATION HERE IS DEPRECATED - MORE DETAILS IN THE NEXT RELEASE.
+When the web interface wants to display a column which references another
+table, you can make things look much better by adding a custom render method
+to your C<DBIx::Class> Result Sources (i.e. the class files for each table).
 
-You I<really> should add some stringification to these C<DBIx::Class> schema
-otherwise the web interface will contain strange data. Add a stringify routine
-to the bottom of each schema file; something like this:
+First, the application will look for a method called C<display_name> and use
+that. Here is an example which could be added to your Result Source classes
+below the line which reads I<DO NOT MODIFY THIS OR ANYTHING ABOVE>, and in
+this case returns the data from the C<title> column:
+
+ sub display_name {
+     my $self = shift;
+     return $self->title || '';
+ }
+
+Failing the existence of a C<display_name> method, the application attempts to
+stringify the row object. Using stringification is not recommended, although
+some people like it. Here is an example of a stringification handler:
 
  use overload '""' => sub {
      my $self = shift;
-     return $self->title;
+     return $self->title || '';
  }, fallback => 1;
 
-In this example the row stringifies to the C<title> column but you can of
-course return anything you wish.
+If all else fails the application prints the best hint it can to describe the
+foreign row. This is something approximating the name of the foreign table,
+the names of the primary keys, and associated values. It's better than
+stringifying the object the way Perl does, anyway.
 
-Also, for those columns where your database uses an auto-incremented value,
-add the C<< is_auto_increment => 1, >> option to the relevant hash in
-add_columns(). This will let the application know you don't need to supply a
-value for new or updated records.
+One other very important tip: for those columns where your database uses an
+auto-incremented value, add the C<< is_auto_increment => 1, >> option to the
+relevant hash in add_columns(). This will let the application know you don't
+need to supply a value for new or updated records. The interface will look
+much better as a result.
+
+Finally, buried within one of the modules in this application are some
+filters, which are applied to data of certain types as it enters or leaves the
+database. If you find a particular data type is not being rendered correctly,
+please drop the author a line at the email address below, explaining what
+you'd like to see instead.
 
 =head2 Download and install ExtJS
 

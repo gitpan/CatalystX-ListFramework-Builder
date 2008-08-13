@@ -17,6 +17,11 @@ Ext.onReady(function(){
     // set up the list grid
     [% PROCESS javascript/grid.tt %]
 
+    var vp = new Ext.Viewport({
+        layout: 'fit'
+        ,items: grid
+    });
+
     // render it
     grid.render();
 

@@ -6,6 +6,7 @@ use warnings FATAL => 'all';
 use base 'Catalyst::Controller';
 use List::Util qw(first);
 use Scalar::Util qw(blessed);
+use overload ();
 #use Data::Dumper;
 
 # Set the actions in this controller to be registered with no prefix
@@ -25,6 +26,16 @@ my %filter_for = (
         },
     },
 );
+
+sub _sfy {
+    my $row = shift;
+    return (
+        eval { $row->display_name }
+        || (overload::Method($row, '""') ? $row.''
+            : ( $row->result_source->source_name
+                .": ". join(', ', map { "$_(${\$row->$_})" } $row->primary_columns) ))
+    );
+}
 
 sub list :Path('/list') {
     my ($self, $c) = @_;
@@ -77,7 +88,18 @@ sub list :Path('/list') {
     while (my $row = $rs->next) {
         my $data = {};
         foreach my $col (@columns) {
-            $data->{$col} = (defined $row->$col ? $row->$col.'' : '');
+            if (!defined $row->$col) {
+                $data->{$col} = '';
+                next;
+            }
+
+            if ($info->{cols}->{$col}->{is_fk}) {
+                $data->{$col} = _sfy($row->$col);
+            }
+            else {
+                $data->{$col} = $row->$col;
+            }
+
             if (exists $info->{cols}->{$col}->{extjs_xtype}
                 and exists $filter_for{ $info->{cols}->{$col}->{extjs_xtype} }) {
                 $data->{$col} =
@@ -86,7 +108,7 @@ sub list :Path('/list') {
             }
         }
         foreach my $m (keys %{ $info->{mfks} }) {
-            $data->{$m} = [ map { "$_" } $row->$m->all ];
+            $data->{$m} = [ map { _sfy($_) } $row->$m->all ];
         }
         push @{$response->{rows}}, $data;
     }
@@ -303,8 +325,8 @@ sub get_stringified :Path('/get_stringified') {
     my $rs = $c->model($lf->{model})
                 ->result_source->related_source($fk)->resultset;
 
-    my @data =  map  { { dbid => $_->id, stringified => "$_" } }
-                grep { "$_" =~ m/$query/ } $rs->all;
+    my @data =  map  { { dbid => $_->id, stringified => _sfy($_) } }
+                grep { _sfy($_) =~ m/$query/ } $rs->all;
     @data = sort { $a->{stringified} cmp $b->{stringified} } @data;
 
     my $page = Data::Page->new;

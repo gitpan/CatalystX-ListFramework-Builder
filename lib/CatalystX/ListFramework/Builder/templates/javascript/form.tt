@@ -127,7 +127,8 @@
                         layout: 'form'
                         ,bodyStyle: 'padding:5px'
                         ,defaultType: 'textfield'
-                        ,labelWidth: 100
+                        //,labelWidth: 75
+                        //,labelAlign: 'right'
                         ,buttonAlign: 'right'
                         ,hideMode: 'offsets'
                         ,autoHeight: true

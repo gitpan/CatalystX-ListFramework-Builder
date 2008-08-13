@@ -1,9 +1,4 @@
 TODO
- - Helpful page for when the table in the url is missing/wrong
- - deprecate stringify in favour of display_name
- - $o->result_source->source_name.": ".join(' ', map { "$_(${\$o->$_})" } $o->primary_columns)
- - right justified form labels
- - remove Delete text from the delete col
  - expandable grid (FAQ item 10)
 
 IF TUITS ARRIVE IN THE POST
@@ -12,6 +7,11 @@ IF TUITS ARRIVE IN THE POST
  - Multi column PKs (via path parts?)/Col 'id' assumed as PK (path parts?)
 
 DONE
+ - Helpful page for when the table in the url is missing/wrong
+ - right justified form labels
+ - remove Delete text from the delete col
+ - deprecate stringify in favour of display_name
+ - $o->result_source->source_name.": ".join(' ', map { "$_(${\$o->$_})" } $o->primary_columns)
  - Data type helpers (rudmentary)
  - Finish work on might_have and has_one support
  - Delete entry confirmation is not modal

@@ -40,13 +40,27 @@ $xtype_for{$_} = 'datefield' for (
 
 sub process {
     my ($self, $c, @parts) = @_;
+    my $lf = $c->stash->{lf} = {};
+
+    # set up tables list, even if only to display to user
+    my $try_source = $c->model(_anydbmodel($c))->result_source;
+    foreach my $m ($try_source->schema->sources) {
+        $lf->{table2path}->{ _m2title($m) } = _m2path($m);
+    }
+
+    # no table specified
     return if !scalar @parts;
 
     my $try_moniker = _qualify2package(@parts);
-    my $lf = { model => _moniker2model($c, $try_moniker) };
+    $lf->{model} = _moniker2model($c, $try_moniker);
+
+    # don't know the requested table
     return if !defined $lf->{model};
 
+    # reset tables list and source, and continue
+    $lf->{table2path} = {};
     my $source = $c->model($lf->{model})->result_source;
+
     foreach my $m ($source->schema->sources) {
         $lf->{table2path}->{ _m2title($m) } = _m2path($m);
     }
@@ -56,7 +70,6 @@ sub process {
     #use Data::Dumper;
     #die Dumper $lf;
 
-    $c->stash->{lf} = $lf;
     return $self;
 }
 
@@ -165,6 +178,11 @@ sub _build_table_info {
             }
         }
     }
+}
+
+sub _anydbmodel {
+    my $c = shift;
+    return first { $_ =~ m/^DBIC::/i } $c->models;
 }
 
 sub _moniker2model {
