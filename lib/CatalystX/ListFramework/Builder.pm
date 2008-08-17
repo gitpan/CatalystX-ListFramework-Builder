@@ -6,7 +6,7 @@ use warnings FATAL => 'all';
 use Class::C3;
 use Devel::InnerPackage qw/list_packages/;
 
-our $VERSION = 0.22;
+our $VERSION = 0.23;
 
 sub setup_components {
     my $class = shift;
@@ -66,7 +66,7 @@ DBIx::Class, using Catalyst
 
 =head1 VERSION
 
-This document refers to version 0.22 of CatalystX::ListFramework::Builder
+This document refers to version 0.23 of CatalystX::ListFramework::Builder
 
 =head1 WARNING
 

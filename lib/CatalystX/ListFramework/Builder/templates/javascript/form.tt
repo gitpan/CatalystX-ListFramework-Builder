@@ -168,7 +168,7 @@
                 }]
             }]
         });
-    }
+    };
 
     var refreshandclose = function(btn,text){
         if (btn == 'ok') {

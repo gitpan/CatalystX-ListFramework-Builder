@@ -92,7 +92,7 @@
                     var searchrow = grid.getStore().getAt(0).data;
                     for (var key in searchrow) {
                         if ((searchrow[key].search('click to ') != -1)
-                            || (searchrow[key] == '')) {
+                            || (searchrow[key] === '')) {
                             // don't submit if still the default, or empty
                             continue;
                         }
@@ -123,7 +123,7 @@
         ,listeners: {
             // fudge for the Rows selector below, when it selects 0 or 'all'
             enable: function() {
-                if ((pagebar.pageSize == 0) || isNaN(pagebar.pageSize)) {
+                if ((pagebar.pageSize === 0) || isNaN(pagebar.pageSize)) {
                     pagebar.pageSize = pagebar.store.data.length;
                     pagebar.updateInfo();
                 }
@@ -253,7 +253,7 @@
                 }
 
                 if (fieldName == 'lf-delete-column') {
-                    if (row == 0) {
+                    if (row === 0) {
                         // edit row is ignored
                         return false;
                     }
@@ -297,7 +297,7 @@
                     return false;
                 }
 
-                if (row == 0) {
+                if (row === 0) {
                     if (isFK(fieldName) || isCheck(fieldName)) {
                         return false;
                     }
@@ -336,7 +336,7 @@
             ,beforeedit: function(e) {
                 // cancel ENTER key driven edits from the filter row
                 // also cancel on the filter row itself if a FK
-                if ((e.row != 0) || isFK(e.field) || isCheck(e.field)) { return false }
+                if ((e.row !== 0) || isFK(e.field) || isCheck(e.field)) { return false }
             }
             ,columnmove: function(oldidx, newidx) {
                 // XXX private parts of pagingtoolbar
@@ -351,7 +351,7 @@
             ,forceFit: true
             ,scrollOffset: 0
             ,getRowClass: function (record, index) {
-                if (pagebar.disabled == true && index == 0) {
+                if (pagebar.disabled === true && index === 0) {
                     return 'half-grey';
                 }
             }

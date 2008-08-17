@@ -1,3 +1,9 @@
+libcatalystx-listframework-builder (0.23) UNRELEASED; urgency=low
+
+  * More Javascript fixes (for IE, and using JSLint)
+
+ -- Oliver Gorwits <oliver.gorwits@oucs.ox.ac.uk>  Sun, 17 Aug 2008 16:21:49 +0100
+
 libcatalystx-listframework-builder (0.22) UNRELEASED; urgency=low
 
   * Fix trailing JS list comma problem in IE (reported by Laust Frederiksen)

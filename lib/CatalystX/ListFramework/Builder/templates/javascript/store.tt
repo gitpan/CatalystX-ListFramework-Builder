@@ -11,11 +11,11 @@
 
     // create the Data Store
     var store = new Ext.data.JsonStore({
-        url: '[% c.req.base %]list/[% lf.main.path %]',
-        root: 'rows',
-        fields: rowRecord,
-        remoteSort: true,
-        totalProperty: 'total',
+        url: '[% c.req.base %]list/[% lf.main.path %]'
+        ,root: 'rows'
+        ,fields: rowRecord
+        ,remoteSort: true
+        ,totalProperty: 'total'
     });
 
     // set default sort if we can
