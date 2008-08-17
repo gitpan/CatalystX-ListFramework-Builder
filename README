@@ -3,7 +3,7 @@ NAME
     DBIx::Class, using Catalyst
 
 VERSION
-    This document refers to version 0.21 of
+    This document refers to version 0.22 of
     CatalystX::ListFramework::Builder
 
 WARNING
@@ -234,9 +234,6 @@ ACKNOWLEDGEMENTS
 
 AUTHOR
     Oliver Gorwits "<oliver.gorwits@oucs.ox.ac.uk>"
-
-    Much of the design of this system came from CatalystX::ListFramework, by
-    Andrew Payne and Peter Edwards.
 
 COPYRIGHT & LICENSE
     Bundled images are Copyright (c) 2006 Mark James, and are from

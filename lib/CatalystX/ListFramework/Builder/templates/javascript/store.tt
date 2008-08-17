@@ -1,10 +1,11 @@
     // create a data record
     var rowRecord = Ext.data.Record.create([
       [% FOREACH col IN lf.main.col_order %]
-        { name: '[% col %]' },
+        [% ',' IF lf.main.col_order.size > 1 AND NOT loop.first %]
+        { name: '[% col %]' }
       [% END %]
       [% FOREACH col IN lf.main.mfks.keys %]
-        { name: '[% col %]' },
+        ,{ name: '[% col %]' }
       [% END %]
     ]);
 

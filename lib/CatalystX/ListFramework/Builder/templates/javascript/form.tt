@@ -5,7 +5,7 @@
     // see: http://extjs.com/forum/showthread.php?t=37685
     Ext.override(Ext.form.Checkbox, {
         onResize : function(){
-        Ext.form.Checkbox.superclass.onResize.apply(this, arguments);
+            Ext.form.Checkbox.superclass.onResize.apply(this, arguments);
             if (!this.boxLabel && !this.fieldLabel) {
                 this.el.alignTo(this.wrap, 'c-c');
             }
@@ -15,7 +15,7 @@
     var tabs = [
       [% FOREACH tname IN lf.tab_order.nsort %]
         [% SET info = lf.table_info.$tname %]
-        {
+        [% ',' IF lf.tab_order.keys.size > 1 AND NOT loop.first %]{
             [% IF lf.tab_order.item(tname) == 1 %]
               title: '[% lf.main.title %]'
             [% ELSE %]
@@ -27,9 +27,11 @@
             [% END %]
 
             ,items: [
+              [% SET count = 1 %]
               [% FOREACH field IN info.col_order %]
               [% NEXT IF info.cols.$field.is_rr %]
-                {
+                [% ',' IF count > 1 %]{
+                [% SET count = count + 1 %]
                   [% IF lf.tab_order.item(tname) == 1 %]
                     name: '[% field %]'
                     ,id: '[% field %]'
@@ -87,10 +89,10 @@
                     ,format: 'Y-m-d'
                     [% END %]
                   [% END %]
-                },
+                }
               [% END %]
             ]
-        },
+        }
       [% END %]
     ];
 

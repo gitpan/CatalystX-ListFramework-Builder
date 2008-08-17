@@ -5,7 +5,7 @@
     // the data store
     var cm = new Ext.grid.ColumnModel([
       [% FOREACH col IN lf.main.col_order %]
-        {
+        [% ',' IF lf.main.col_order.size > 1 AND NOT loop.first %]{
           [% IF lf.main.cols.$col.is_fk %]
             header:     '[% lf.main.cols.$col.heading %] (FK)'
           [% ELSE %]
@@ -26,10 +26,10 @@
                 return value;
               [% END %]
             }
-        },
+        }
       [% END %]
       [% FOREACH col IN lf.main.mfks.keys %]
-        {
+        ,{
             header: '[% lf.main.mfks.item(col) %]'
             ,dataIndex: 'lf-multi-column'
             ,align: 'center'
@@ -48,9 +48,9 @@
                         + ' Show';
                 }
             }
-        },
+        }
       [% END %]
-        {
+        ,{
             header: 'Delete'
             ,dataIndex: 'lf-delete-column'
             ,align: 'center'
@@ -166,7 +166,8 @@
                 ,emptyText: 'Select a table ...'
                 ,store: [
                   [% FOREACH table IN lf.table2path.keys.sort %]
-                    ['[% lf.table2path.item(table) %]', '[% table %]'],
+                    [% ',' IF lf.table2path.keys.size > 1 AND NOT loop.first %]
+                    ['[% lf.table2path.item(table) %]', '[% table %]']
                   [% END %]
                 ]
                 ,listeners: {
@@ -320,10 +321,13 @@
                     mainform.setValues({
                       [% FOREACH table IN lf.tab_order.keys %]
                       [% NEXT IF lf.tab_order.item(table) == 1 %]
+                        [% SET count = 1 %]
                         [% FOREACH col IN lf.table_info.$table.cols.keys %]
                         [% NEXT UNLESS lf.table_info.$table.cols.$col.is_fk
                                 AND NOT lf.table_info.$table.cols.$col.editable %]
-                          '[% lf.table_info.$table.table %].[% col %]': rec.data['[% lf.main.pk %]'],
+                          [% ',' IF count > 1 %]
+                            '[% lf.table_info.$table.table %].[% col %]': rec.data['[% lf.main.pk %]']
+                          [% SET count = count + 1 %]
                         [% END %]
                       [% END %]
                     });
