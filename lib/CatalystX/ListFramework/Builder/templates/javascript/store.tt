@@ -78,4 +78,6 @@
         pagebar.store.data.length = numrecs;
         pagebar.updateInfo();
         pagebar.enable();
+
+        // refresher();
     });

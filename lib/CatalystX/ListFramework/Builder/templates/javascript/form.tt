@@ -127,14 +127,13 @@
                     // tab defaults
                     ,defaults: {
                         layout: 'form'
-                        ,bodyStyle: 'padding:5px'
+                        ,bodyStyle: 'padding: 5px;'
                         ,defaultType: 'textfield'
-                        //,labelWidth: 75
-                        //,labelAlign: 'right'
                         ,buttonAlign: 'right'
-                        ,hideMode: 'offsets'
                         ,autoHeight: true
                         ,hideMode: 'offsets'
+                        //,labelWidth: 80
+                        //,labelAlign: 'right'
                     }
     
                     ,items: tabs

@@ -33,6 +33,7 @@ $xtype_for{$_} = 'timefield' for (
 
 $xtype_for{$_} = 'datefield' for (
     'date',
+    'DATE',
     'timestamp',
     'timestamp without time zone',
     'timestamp with time zone',

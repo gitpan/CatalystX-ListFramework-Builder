@@ -180,52 +180,24 @@
         ]
     });
 
-//    Ext.override(Ext.grid.GridView, {
-//        layout : function(){
-//            if(!this.mainBody){
-//                return; // not rendered
-//            }
-//            var g = this.grid;
-//            var c = g.getGridEl();
-//            var csize = c.getSize(true);
-//            var vw = csize.width;
-//    
-//            if(vw < 20 || csize.height < 20){ // display: none?
-//                return;
-//            }
-//    
-//            if(g.autoHeight){
-//                if(g.maxHeight){
-//                    this.el.setSize(vw, g.maxHeight);
-//                    var hdHeight = this.mainHd.getHeight();
-//                    var vh = g.maxHeight - (hdHeight);
-//                    this.scroller.setSize(vw, vh);
-//                }else{
-//                    this.scroller.dom.style.overflow = 'visible';
-//                }
-//            }else{
-//                this.el.setSize(csize.width, csize.height);
-//    
-//                var hdHeight = this.mainHd.getHeight();
-//                var vh = csize.height - (hdHeight);
-//    
-//                this.scroller.setSize(vw, vh);
-//                if(this.innerHd){
-//                    this.innerHd.style.width = (vw)+'px';
-//                }
-//            }
-//            if(this.forceFit){
-//                if(this.lastViewWidth != vw){
-//                    this.fitColumns(false, false);
-//                    this.lastViewWidth = vw;
-//                }
-//            }else {
-//                this.autoExpand();
-//                this.syncHeaderScroll();
-//            }
-//            this.onLayout(vw, vh);
-//        }
-//    });
+    var refresher = function() {
+        var vph = vp.getSize(true).height - 130;
+        var gh = grid.getGridEl().getSize(true).height;
+        var gw = grid.getGridEl().getSize(true).width;
+
+        if (gh > vph) {
+            alert('bigger');
+            grid.getGridEl().setSize(gw, vph);
+            grid.getView().scroller.setSize(gw, vph);
+        }
+        else {
+            alert('smaller');
+            var hdHeight = grid.getView().mainHd.getHeight();
+            var vh = gh - (hdHeight);
+            grid.getGridEl().setSize(gw, vh);
+            grid.getView().scroller.setSize(gw, vh);
+        }
+    };
 
     var grid = new Ext.grid.EditorGridPanel({
         id: 'search-grid'
@@ -238,6 +210,16 @@
         ,colModel: cm
         ,trackMouseOver: true
         ,disableSelection: true
+        ,viewConfig: new Ext.grid.GridView({
+            autoFill: true
+            ,forceFit: true
+            //,scrollOffset: 0
+            ,getRowClass: function (record, index) {
+                if (pagebar.disabled === true && index === 0) {
+                    return 'half-grey';
+                }
+            }
+        })
         ,listeners: {
             cellclick: function(g, row, col) {
                 var rec = g.getStore().getAt(row);
@@ -346,14 +328,5 @@
         ,selModel: new Ext.grid.RowSelectionModel // req'd to deselect row
         ,tbar: toolbar
         ,bbar: pagebar
-        ,viewConfig: new Ext.grid.GridView({
-            autoFill: true
-            ,forceFit: true
-            ,scrollOffset: 0
-            ,getRowClass: function (record, index) {
-                if (pagebar.disabled === true && index === 0) {
-                    return 'half-grey';
-                }
-            }
-        })
     });
+

@@ -1,3 +1,9 @@
+libcatalystx-listframework-builder (0.24) UNRELEASED; urgency=low
+
+  * CSS fix for IE so that tabbed form with fieldset works properly
+
+ -- Oliver Gorwits <oliver.gorwits@oucs.ox.ac.uk>  Sun, 17 Aug 2008 20:53:15 +0100
+
 libcatalystx-listframework-builder (0.23) UNRELEASED; urgency=low
 
   * More Javascript fixes (for IE, and using JSLint)

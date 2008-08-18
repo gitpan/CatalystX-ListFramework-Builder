@@ -22,9 +22,6 @@ Ext.onReady(function(){
         ,items: grid
     });
 
-    // render it
-    grid.render();
-
     // trigger the data store load
     // NB start is needed by store, but not by backend
     store.load({params:{start:0, limit:10, page:1}});
@@ -34,5 +31,6 @@ Ext.onReady(function(){
 </script>
 
 [% PROCESS style.tt %]
+[% PROCESS iefix.tt IF c.req.user_agent.match('\.NET CLR') %]
 
 <div id="list-grid"></div>
