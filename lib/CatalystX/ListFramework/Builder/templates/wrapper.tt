@@ -5,9 +5,9 @@
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
 <title>[% title %]</title>
 
-<link rel="stylesheet" type="text/css" href="[% c.base %][% c.javascript %]/resources/css/ext-all.css" />
-<script type="text/javascript" src="[% c.base %][% c.javascript %]/adapter/ext/ext-base.js"></script>
-<script type="text/javascript" src="[% c.base %][% c.javascript %]/ext-all.js"></script>
+<link rel="stylesheet" type="text/css" href="[% c.extjs2 %]/resources/css/ext-all.css" />
+<script type="text/javascript" src="[% c.extjs2 %]/adapter/ext/ext-base.js"></script>
+<script type="text/javascript" src="[% c.extjs2 %]/ext-all.js"></script>
 </head>
 
 [% content %]

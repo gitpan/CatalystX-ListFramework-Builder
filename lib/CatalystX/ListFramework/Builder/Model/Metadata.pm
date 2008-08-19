@@ -183,7 +183,7 @@ sub _build_table_info {
 
 sub _anydbmodel {
     my $c = shift;
-    return first { $_ =~ m/^DBIC::/i } $c->models;
+    return first { $_ =~ m/^LFB::DBIC::/i } $c->models;
 }
 
 sub _moniker2model {
@@ -201,7 +201,7 @@ sub _m2title {
     my $model = shift;
 
     my @title = split '::', $model;
-    shift @title if $title[0] =~ m/^DBIC$/i; # drop our Model namespace
+    shift @title while $title[0] =~ m/^(?:LFB|DBIC)$/i; # drop Model namespace
     s/(\w)([A-Z][a-z0-9])/$1 $2/g for @title; # reverse _table2moniker, ish
     return join ' ', @title;
 }

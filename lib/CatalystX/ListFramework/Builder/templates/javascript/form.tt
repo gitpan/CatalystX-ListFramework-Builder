@@ -68,7 +68,7 @@
                     ,pageSize: 5
                     ,triggerAction: 'all'
                     ,store: new Ext.data.JsonStore({
-                        url: '[% c.req.base %]get_stringified/[% info.path %]'
+                        url: '[% c.uri_for( c.controller('LFB::Root').action_for('no_table'), info.path, "get_stringified" ) %]'
                         ,root: 'rows' ,totalProperty: 'total'
                         ,fields: [ 'dbid', 'stringified' ]
                         ,listeners: {
@@ -112,7 +112,7 @@
                 xtype: 'form'
                 ,id: 'form-panel'
                 ,border: false
-                ,url: '[% c.req.base %]update/[% lf.main.path %]'
+                ,url: '[% c.uri_for( c.controller('LFB::Root').action_for('no_table'), lf.main.path, "update" ) %]'
                 ,autoHeight: true
                 ,layout: 'fit'
     

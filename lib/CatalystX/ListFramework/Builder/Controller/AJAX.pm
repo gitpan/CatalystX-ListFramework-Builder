@@ -4,13 +4,10 @@ use strict;
 use warnings FATAL => 'all';
 
 use base 'Catalyst::Controller';
+
 use List::Util qw(first);
 use Scalar::Util qw(blessed);
 use overload ();
-#use Data::Dumper;
-
-# Set the actions in this controller to be registered with no prefix
-__PACKAGE__->config->{namespace} = '';
 
 my %filter_for = (
     checkbox => {
@@ -37,7 +34,17 @@ sub _sfy {
     );
 }
 
-sub list :Path('/list') {
+
+sub local_base : Chained('/lfb/root/table') PathPart('') CaptureArgs(0) {
+    # a no-op, used until Chained('../table') is supported
+}
+
+sub end : Private {
+    my ($self, $c) = @_;
+    $c->detach('LFB::JSON') if $c->stash->{json_data};
+}
+
+sub list : Chained('local_base') Args(0) {
     my ($self, $c) = @_;
     my $lf = $c->stash->{lf};
     my $info = $lf->{main};
@@ -137,12 +144,13 @@ sub list :Path('/list') {
 # and then popping items off that stack, remembering the PK vals as we go,
 # for the benefit of later stack items (stack is built for this purpose).
 
-sub update :Path(/update) {
+sub update : Chained('local_base') Args(0) {
     my ($self, $c) = @_;
     my $lf = $c->stash->{lf};
     my $response = $c->stash->{json_data} = {};
 
     my $stack = _build_table_data($c, [], $lf->{model});
+    #use Data::Dumper;
     #print STDERR Dumper $stack;
 
     # stack is processed in one transaction, so either all rows are
@@ -288,7 +296,7 @@ sub _process_row_stack {
     return 1;
 }
 
-sub delete :Path('/delete') {
+sub delete : Chained('local_base') Args(0) {
     my ($self, $c) = @_;
     my $lf = $c->stash->{lf};
     my $response = $c->stash->{json_data} = {};
@@ -308,7 +316,7 @@ sub delete :Path('/delete') {
     return $self;
 }
 
-sub get_stringified :Path('/get_stringified') {
+sub get_stringified : Chained('local_base') Args(0) {
     my ($self, $c) = @_;
     my $lf = $c->stash->{lf};
     my $response = $c->stash->{json_data} = {};
@@ -320,7 +328,7 @@ sub get_stringified :Path('/get_stringified') {
 
     # sanity check foreign key, and set up string part search
     $fk =~ s/^[^.]*\.//; $fk =~ s/\s+$//;
-    $query = ($query ? qr/\Q$query\E/ : qr/./);
+    $query = ($query ? qr/\Q$query\E/i : qr/./);
 
     my $rs = $c->model($lf->{model})
                 ->result_source->related_source($fk)->resultset;

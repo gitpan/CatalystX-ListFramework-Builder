@@ -8,14 +8,11 @@ use base 'Catalyst::Controller';
 use File::stat;
 use File::Basename;
 
-# Set the actions in this controller to be registered with no prefix
-__PACKAGE__->config->{namespace} = '';
-
 # erm, this is a bit sick. it's basically Catalyst::Plugin::Static on the
 # cheap. there are a couple of nice icons we want to make sure the users have
 # but it'd be too much hassle to ask them to install, so we bundle them.
 #
-sub image :Path('/image') {
+sub image : Chained('/lfb/root/base') Args(1) {
     my ($self, $c, $file) = @_;
 
     (my $pkg_path = __PACKAGE__) =~ s{::}{/}g;

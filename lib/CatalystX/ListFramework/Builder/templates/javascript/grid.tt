@@ -17,10 +17,10 @@
               [% IF lf.main.cols.$col.extjs_xtype == 'checkbox' %]
                 if (value == '(click to add filter)') { return '' }
                 if (value == '1') {
-                  return '<img src="[% c.req.base %]/image/bullet_green.png"/>';
+                  return '<img src="[% c.uri_for( c.controller('LFB::Image').action_for('image'), "bullet_green.png" ) %]" />';
                 }
                 else {
-                  return '<img src="[% c.req.base %]/image/bullet_red.png"/>';
+                  return '<img src="[% c.uri_for( c.controller('LFB::Image').action_for('image'), "bullet_red.png" ) %]" />';
                 }
               [% ELSE %]
                 return value;
@@ -39,12 +39,12 @@
             ,renderer: function (value,metadata,record,rowindex,colindex,store) {
                 if (value == '(click to add filter)') { return '' }
                 else {
+                    metadata.css += 'half-grey';
                     metadata.attr += 'ext:qtitle="[% lf.main.mfks.item(col) %]" ext:qtip="'
                         + (record.get('[% col %]').join(',<br />') || '(none)') + '"';
-                    metadata.css += 'half-grey';
                     return '<img ext:qtitle="[% lf.main.mfks.item(col) %]" ext:qtip="'
                         + (record.get('[% col %]').join(',<br />') || '(none)')
-                        + '" src="[% c.req.base %]/image/magnifier.png"/>'
+                        + '" src="[% c.uri_for( c.controller('LFB::Image').action_for('image'), "magnifier.png" ) %]" />'
                         + ' Show';
                 }
             }
@@ -52,16 +52,19 @@
       [% END %]
         ,{
             header: 'Delete'
+            ,width: 30
             ,dataIndex: 'lf-delete-column'
-            ,align: 'center'
+            ,align: 'left'
             ,sortable: false
             ,menuDisabled: true
             ,renderer: function (value,metadata,record,rowindex,colindex,store) {
                 if (value == '(click to add filter)') { return '' }
                 else {
-                    metadata.css += 'half-grey-pointer';
-                    return '<img src="[% c.req.base %]/image/bin_closed.png"/>'
-                        + ' [% lf.main.pk %](' + record.get('[% lf.main.pk %]') + ')';
+                    metadata.attr += 'ext:qtitle="Delete" ext:qtip="'
+                        + ' [% lf.main.pk %](' + record.get('[% lf.main.pk %]') + ')"';
+                    return '<img ext:qtitle="Delete" ext:qtip="'
+                        + ' [% lf.main.pk %](' + record.get('[% lf.main.pk %]') + ')"'
+                        + ' src="[% c.uri_for( c.controller('LFB::Image').action_for('image'), "bin_closed.png" ) %]" />';
                 }
             }
         }
@@ -76,7 +79,7 @@
             {
                 text: 'Clear Filters'
                 ,cls: 'x-btn-text-icon'
-                ,icon: '[% c.req.base %]image/bin_closed.png'
+                ,icon: '[% c.uri_for( c.controller('LFB::Image').action_for('image'), "bin_closed.png" ) %]'
                 // XXX private method to refresh
                 ,handler: function (){
                     store.baseParams = {}; // clear search opts
@@ -86,7 +89,7 @@
             ,' ' ,{
                 text: 'Apply Filters'
                 ,cls: 'x-btn-text-icon'
-                ,icon: '[% c.req.base %]/image/find.png'
+                ,icon: '[% c.uri_for( c.controller('LFB::Image').action_for('image'), "find.png" ) %]'
                 ,handler: function (){
                     var params = {};
                     var searchrow = grid.getStore().getAt(0).data;
@@ -105,7 +108,7 @@
             ,'->' ,{
                 text: 'Add New [% lf.main.title %]'
                 ,cls: 'x-btn-text-icon'
-                ,icon: '[% c.req.base %]/image/add.png'
+                ,icon: '[% c.uri_for( c.controller('LFB::Image').action_for('image'), "add.png" ) %]'
                 ,handler: function(){
                     // draw the window!
                     var win = generate_win();
@@ -167,12 +170,12 @@
                 ,store: [
                   [% FOREACH table IN lf.table2path.keys.sort %]
                     [% ',' IF lf.table2path.keys.size > 1 AND NOT loop.first %]
-                    ['[% lf.table2path.item(table) %]', '[% table %]']
+                    ['[% c.uri_for( c.controller('LFB::Root').action_for('no_table'), lf.table2path.item(table) ) %]', '[% table %]']
                   [% END %]
                 ]
                 ,listeners: {
                     beforeselect: function(combo, record, index) {
-                        window.location = '[% c.req.base %]' + record.data.value;
+                        window.location = record.data.value;
                         return false;
                     }
                 }
@@ -180,24 +183,63 @@
         ]
     });
 
-    var refresher = function() {
-        var vph = vp.getSize(true).height - 130;
-        var gh = grid.getGridEl().getSize(true).height;
-        var gw = grid.getGridEl().getSize(true).width;
 
-        if (gh > vph) {
-            alert('bigger');
-            grid.getGridEl().setSize(gw, vph);
-            grid.getView().scroller.setSize(gw, vph);
+    // this override allows the grid panel to resize with more rows, then
+    // start scrolling as it exceeds the length of the viewport (browser win)
+    Ext.override(Ext.grid.GridView, {
+        layout : function(){
+            if(!this.mainBody){
+                return; // not rendered
+            }
+            var g = this.grid;
+            var c = g.getGridEl();
+            var csize = c.getSize(true);
+            var vw = csize.width;
+    
+            if(vw < 20 || csize.height < 20){ // display: none?
+                return;
+            }
+    
+            if(g.autoHeight){
+                var bb = Ext.select('div.x-grid3-body').first().getBottom();
+
+                if (bb > 20) {
+                    var vph = Ext.getCmp('vpid').getSize(true).height - 110;
+                    var hdHeight = this.mainHd.getHeight();
+                    var vh = vph - (hdHeight);
+
+                    if (bb > vph) {
+                        this.el.setSize(vw, vph);
+                        this.scroller.setSize(vw, vh);
+                    }
+                    else {
+                        this.el.setSize(vw, bb - 40);
+                        //this.scroller.setSize(vw, bb - 40);
+                    }
+                }
+            }else{
+                this.el.setSize(csize.width, csize.height);
+    
+                var hdHeight = this.mainHd.getHeight();
+                var vh = csize.height - (hdHeight);
+    
+                this.scroller.setSize(vw, vh);
+                if(this.innerHd){
+                    this.innerHd.style.width = (vw)+'px';
+                }
+            }
+            if(this.forceFit){
+                if(this.lastViewWidth != vw){
+                    this.fitColumns(false, false);
+                    this.lastViewWidth = vw;
+                }
+            }else {
+                this.autoExpand();
+                this.syncHeaderScroll();
+            }
+            this.onLayout(vw, vh);
         }
-        else {
-            alert('smaller');
-            var hdHeight = grid.getView().mainHd.getHeight();
-            var vh = gh - (hdHeight);
-            grid.getGridEl().setSize(gw, vh);
-            grid.getView().scroller.setSize(gw, vh);
-        }
-    };
+    });
 
     var grid = new Ext.grid.EditorGridPanel({
         id: 'search-grid'
@@ -248,7 +290,7 @@
                             if (btn == 'yes') {
                                 grid.loadMask.el.mask();
                                 Ext.Ajax.request({
-                                    url: '[% c.req.base %]delete/[% lf.main.path %]'
+                                    url: '[% c.uri_for( c.controller('LFB::Root').action_for('no_table'), lf.main.path, "delete" ) %]'
                                     ,params: {
                                         key: data
                                     }

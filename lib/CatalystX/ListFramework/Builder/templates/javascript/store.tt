@@ -11,7 +11,7 @@
 
     // create the Data Store
     var store = new Ext.data.JsonStore({
-        url: '[% c.req.base %]list/[% lf.main.path %]'
+        url: '[% c.uri_for( c.controller('LFB::Root').action_for('no_table'), lf.main.path, "list" ) %]'
         ,root: 'rows'
         ,fields: rowRecord
         ,remoteSort: true
@@ -78,6 +78,4 @@
         pagebar.store.data.length = numrecs;
         pagebar.updateInfo();
         pagebar.enable();
-
-        // refresher();
     });

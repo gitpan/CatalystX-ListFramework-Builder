@@ -1,3 +1,17 @@
+libcatalystx-listframework-builder (0.25) UNRELEASED; urgency=low
+
+  * Grid expands to show rows until it needs a scrollbar
+  * Delete column uses tooltip for text
+  * Fix for form's combobox (related) search to be case insensitive
+  * Nuke all the c.base usage in favour of c.uri_for
+  * Change all component namespace into LFB::
+    Your DBIC Model's config *must* change from Model::DBIC to Model::LFB::DBIC
+  * Config var for ExtJS lib location changed from javascript to extjs2
+    Your App config *must* change from using "javascript" to "extjs2"
+  * Application is now relocateable and useable as a plugin (see POD for details)
+
+ -- Oliver Gorwits <oliver.gorwits@oucs.ox.ac.uk>  Tue, 19 Aug 2008 14:40:05 +0100
+
 libcatalystx-listframework-builder (0.24) UNRELEASED; urgency=low
 
   * CSS fix for IE so that tabbed form with fieldset works properly

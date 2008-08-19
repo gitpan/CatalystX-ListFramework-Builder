@@ -29,6 +29,7 @@ lib/CatalystX/ListFramework/Builder/templates/style.tt
 lib/CatalystX/ListFramework/Builder/templates/iefix.tt
 lib/CatalystX/ListFramework/Builder/templates/list-and-search.tt
 lib/CatalystX/ListFramework/Builder/templates/list.tt
+lib/CatalystX/ListFramework/Builder/templates/helloworld.tt
 lib/CatalystX/ListFramework/Builder/Controller/Root.pm
 lib/CatalystX/ListFramework/Builder/Controller/Image.pm
 lib/CatalystX/ListFramework/Builder/Controller/AJAX.pm

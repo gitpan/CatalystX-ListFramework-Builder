@@ -1,5 +1,4 @@
 TODO
- - expandable grid (FAQ item 10)
 
 IF TUITS ARRIVE IN THE POST
  - support for multiple FK referencing the same table (see _build_table_data
@@ -7,6 +6,7 @@ IF TUITS ARRIVE IN THE POST
  - Multi column PKs (via path parts?)/Col 'id' assumed as PK (path parts?)
 
 DONE
+ - expandable grid (FAQ item 10)
  - Helpful page for when the table in the url is missing/wrong
  - right justified form labels
  - remove Delete text from the delete col
@@ -31,7 +31,4 @@ DONE
  - Auto generate Master/Site
  - Catalyst Component base class
  - Make TT files use configurable URL paths (e.g. css)
-
-CANTFIX
- - FK cell is hyperlink to filtered view on other table
 

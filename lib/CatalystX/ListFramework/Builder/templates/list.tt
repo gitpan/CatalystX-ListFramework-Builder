@@ -9,6 +9,7 @@ Ext.onReady(function(){
     Ext.apply(Ext.QuickTips.getQuickTip(), {
         showDelay: 0
         ,trackMouse: true
+        ,mouseOffset: [-10,20] // otherwise Delete tt overruns browser win
     });
 
     // create the Data Store
@@ -19,6 +20,7 @@ Ext.onReady(function(){
 
     var vp = new Ext.Viewport({
         layout: 'fit'
+        ,id: 'vpid'
         ,items: grid
     });
 

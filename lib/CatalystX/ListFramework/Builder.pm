@@ -6,7 +6,7 @@ use warnings FATAL => 'all';
 use Class::C3;
 use Devel::InnerPackage qw/list_packages/;
 
-our $VERSION = 0.24;
+our $VERSION = 0.25;
 
 sub setup_components {
     my $class = shift;
@@ -23,7 +23,8 @@ sub setup_components {
         View::TT
     );
 
-    foreach my $p (@packages) {
+    foreach my $orig (@packages) {
+        (my $p = $orig) =~ s/::/::LFB::/;
         my $comp = "${class}::${p}";
 
         # require will shortcircuit and return true if the component is
@@ -33,7 +34,7 @@ sub setup_components {
             # make a component on the fly in the App namespace
             eval qq(
                 package $comp;
-                use base qw/CatalystX::ListFramework::Builder::${p}/;
+                use base qw/CatalystX::ListFramework::Builder::${orig}/;
                 1;
             );
             die $@ if $@;
@@ -66,13 +67,14 @@ DBIx::Class, using Catalyst
 
 =head1 VERSION
 
-This document refers to version 0.24 of CatalystX::ListFramework::Builder
+This document refers to version 0.25 of CatalystX::ListFramework::Builder
 
 =head1 WARNING
 
 This is an I<ALPHA RELEASE>. I'd really appreciate any bug reports; you can
 use the CPAN RT bug tracking system, or email me (Oliver) directly at the
-address at the bottom of this page.
+address at the bottom of this page. Please also be aware that the
+configuration file content has changed from previous releases of the module.
 
 =head1 PURPOSE
 
@@ -87,13 +89,11 @@ interfaces on the fly. They are a bit whizzy and all Web 2.0-ish.
 
 A configuration file somewhere on your system:
 
- # Config::General formal
  # [listframeworkuser.conf] in Config::General format
  
- base         http://mywebserver.example.com
- javascript   /javascript/extjs-2
+ extjs2   /javascript/extjs-2
  
- <Model::DBIC>
+ <Model::LFB::DBIC>
      schema_class   My::Database::Schema
      connect_info   dbi:Pg:dbname=mydbname;host=mydbhost.example.com;
      connect_info   username
@@ -101,9 +101,9 @@ A configuration file somewhere on your system:
      <connect_info>
          AutoCommit   1
      </connect_info>
- </Model::DBIC>
+ </Model::LFB::DBIC>
 
-And in the cgi-bin area of your web server:
+And in the CGI area of your web server:
 
  package ListFrameworkUser;
  use Catalyst qw(ConfigLoader +CatalystX::ListFramework::Builder);
@@ -111,9 +111,8 @@ And in the cgi-bin area of your web server:
  __PACKAGE__->setup;
  1;
 
-Now going to C<http://mywebserver.example.com/cgi-bin/tablename> will render
-the web frontend for a table in your database. This can be much refined; see
-L</USAGE>, below.
+Now going to the CGI area's URL will display a list of the tables in your
+database. Each item is a link to the web interface for that table.
 
 =head1 DESCRIPTION
 
@@ -160,7 +159,7 @@ to your C<DBIx::Class> Result Sources (i.e. the class files for each table).
 
 First, the application will look for a method called C<display_name> and use
 that. Here is an example which could be added to your Result Source classes
-below the line which reads I<DO NOT MODIFY THIS OR ANYTHING ABOVE>, and in
+below the line which reads C<DO NOT MODIFY THIS OR ANYTHING ABOVE>, and in
 this case returns the data from the C<title> column:
 
  sub display_name {
@@ -196,8 +195,9 @@ you'd like to see instead.
 
 =head2 Download and install ExtJS
 
-You'll need to download the ExtJS Javascript Library (version 2.1 or later)
-from this web page: L<http://extjs.com/products/extjs/download.php>.
+You'll need to download the ExtJS Javascript Library (version 2.2+
+recommended), from this web page:
+L<http://extjs.com/products/extjs/download.php>.
 
 Install it to your web server in a location that it is able to serve as static
 content. Make a note of the path used in a URL to retrieve this content, as it
@@ -207,9 +207,8 @@ will be needed in the application configuration file, below.
 
 Create the application configuration file, an example of which is below:
 
- base         http://mywebserver.example.com
- javascript   /javascript/extjs-2
- <Model::DBIC>
+ extjs2   /javascript/extjs-2
+ <Model::LFB::DBIC>
      schema_class   My::Database::Schema
      connect_info   dbi:Pg:dbname=mydbname;host=mydbhost.example.com;
      connect_info   username
@@ -217,18 +216,37 @@ Create the application configuration file, an example of which is below:
      <connect_info>
          AutoCommit   1
      </connect_info>
- </Model::DBIC>
+ </Model::LFB::DBIC>
 
-The application needs to know where your copy of ExtJS (version 2.1 or later)
-is, on the web server. Use the C<javascript> option as shown above to specify
-the URL path to the libraries. This will be used in the templates in some way
-like this:
+The C<Model::LFB::DBIC> section must look (and be named) exactly like that
+above, except you should of course change the C<schema_class> value and the
+values within C<connect_info>.
 
- <script type="text/javascript" src="[% c.base %][% c.javascript %]/ext-all.js" />
+The application needs to know where your copy of ExtJS is, on the web server.
+Use the C<extjs2> option as shown above to specify the URL path to the
+libraries. This will be used in the templates in some way like this:
 
-The C<Model::DBIC> section must look (and be named) exactly like that above,
-except you should of course change the C<schema_class> value and the values
-within C<connect_info>.
+ <script type="text/javascript" src="[% c.extjs2 %]/ext-all.js" />
+
+=head3 Relocating LFB to another URL path
+
+If you want to use this application as a plugin with another Catalyst system,
+it should work fine, but you probably want to serve pages under a different
+path on your web site. To do that, add the following to your configuration
+file:
+
+ <Controller::LFB::Root>
+     <action>
+         <base>
+             PathPart   admin
+         </base>
+     </action>
+ </Controller::LFB::Root>
+
+In the above example, the path C<...E<sol>adminE<sol>> will contain the LFB
+application, and all generated links in LFB will also make use of that path.
+Remember this is added to the C<base> of your Cataylst application which,
+depending on your web server configuration, might also have a leading path.
 
 =head2 Catalyst application
 
@@ -257,7 +275,9 @@ here is a brief example of the change required:
 
 Presumably the location of the Catalyst application created in the previous
 section maps to a particular URL path. Follow this path with the name of a
-table in the database, and you should be presented with a table of data.
+table in the database, and you should be presented with a table of data. If
+you omit the table name, then the application prompts you with a list of the
+available tables.
 
 =head1 EXAMPLES
 
@@ -272,11 +292,19 @@ includes the files necessary to set up a small demo application with SQLite3.
 
 There's no support for multiple column primary keys (composite/compound
 keys). This has saved a lot of time in development because it greatly
-simplifies the L<Catalyst> and L<DBIx::Class> code. However if you're
-desperate for this feature, drop me a line because you might be able to buy
-some of my time to do the work required.
+simplifies the L<Catalyst> and L<DBIx::Class> code.
+
+=item No two columns in a given table may have the same FK constraint
+
+If you have two columns which both have foreign key constraints to the same
+table, it's very likely LFB will not work. Again this is a simplification
+which speeded the initial development.
 
 =back
+
+For the issues above, if you're desperate that the feature be implemented
+soon, please drop me a line at the address below, because you might be able to
+buy some of my time for the development.
 
 =head1 REQUIREMENTS
 
@@ -284,7 +312,7 @@ some of my time to do the work required.
 
 =item *
 
-ExtJS Javascript Library version 2.1 or later, from L<http://extjs.com>.
+ExtJS Javascript Library (version 2.2+ recommended), from L<http://extjs.com>.
 
 =item *
 

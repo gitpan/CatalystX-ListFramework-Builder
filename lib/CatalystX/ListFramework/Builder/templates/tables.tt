@@ -89,7 +89,7 @@ Please click on one of the tables below...
         <div class="infos">
 <ul>
 [% FOREACH table IN lf.table2path.keys.sort %]
-<li><a href="[% c.req.base %][% lf.table2path.item(table) %]">[% table %]</a></li>
+<li><a href="[% c.uri_for( c.controller('LFB::Root').action_for('no_table'), lf.table2path.item(table) ) %]">[% table %]</a></li>
 [% END %]
 </ul>
 </div>
