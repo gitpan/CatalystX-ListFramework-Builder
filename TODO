@@ -1,4 +1,9 @@
 TODO
+ - "tablename as checkboxname is bad, cause i have 'view' classes which have an
+   sql statement as table" (abraxxa)
+ - "why do you name the columns col[n] in the search but use the column names
+   to access the data in Controller::AJAX sub list" addl sql query (abraxxa)
+ - DateTime inflation / JSON (nigel)
 
 IF TUITS ARRIVE IN THE POST
  - support for multiple FK referencing the same table (see _build_table_data
@@ -6,6 +11,9 @@ IF TUITS ARRIVE IN THE POST
  - Multi column PKs (via path parts?)/Col 'id' assumed as PK (path parts?)
 
 DONE
+ - underscores in table/db names ? (abraxxa)
+ - exists error as mentioned on list (abraxxa)
+ - friendly page if you haven't got javascript enabled, or not loaded (malcolm)
  - expandable grid (FAQ item 10)
  - Helpful page for when the table in the url is missing/wrong
  - right justified form labels

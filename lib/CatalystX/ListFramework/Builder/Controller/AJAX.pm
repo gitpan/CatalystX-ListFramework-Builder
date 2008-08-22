@@ -36,12 +36,16 @@ sub _sfy {
 
 
 sub local_base : Chained('/lfb/root/table') PathPart('') CaptureArgs(0) {
-    # a no-op, used until Chained('../table') is supported
+    my ($self, $c) = @_;
+    $c->stash->{current_view} = 'LFB::JSON';
 }
 
-sub end : Private {
+sub end : ActionClass('RenderView') {}
+
+sub dumpmeta : Chained('local_base') Args(0) {
     my ($self, $c) = @_;
-    $c->detach('LFB::JSON') if $c->stash->{json_data};
+    $c->stash->{json_data} = $c->stash->{lf};
+    return $self;
 }
 
 sub list : Chained('local_base') Args(0) {
@@ -59,7 +63,7 @@ sub list : Chained('local_base') Args(0) {
     $sort = $info->{pk} if $sort !~ m/^\w+$/ or !exists $info->{cols}->{$sort};
 
     # set up pager, if needed
-    my $search_opts = (($page =~ m/^\d+$/ and $limit =~ m/^\d+$/ and $limit != 0)
+    my $search_opts = (($page =~ m/^\d+$/ and $limit =~ m/^\d+$/)
         ? { 'page' => $page, 'rows' => $limit, } : {});
 
     # find filter fields in UI form

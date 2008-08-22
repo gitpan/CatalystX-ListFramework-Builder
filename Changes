@@ -1,3 +1,20 @@
+libcatalystx-listframework-builder (0.27) UNRELEASED; urgency=low
+
+  * Fix for expanding grid dealing with viewport resize (reported by redspike)
+  * New test suite, about one third done (tests basics, and the list action)
+  * Fix for use as plugin with existing TT View + RenderView (thanks to karpet and abraxxa)
+  * Add metadata dumper action, in support of testing
+  * Fix the helloworld template to have an HTML tag
+  * Remove unecessary check for !=0 on params in the list AJAX call (has ||= already)
+  * Remove unused params from TT view
+  * Use c.config.extjs2 in templates rather than c.extjs2 (report by abraxxa)
+  * Small tidying to templates used for main page output 
+  * Friendly error page if Javascript is disabled in the client browser (report by malcolm)
+  * Fix exists bug in Metadata.pm (thanks to abraxxa)
+  * Better support for Result Class names with underscores (report by abraxxa)
+
+ -- Oliver Gorwits <oliver.gorwits@oucs.ox.ac.uk>  Fri, 22 Aug 2008 13:00:54 +0100
+
 libcatalystx-listframework-builder (0.25) UNRELEASED; urgency=low
 
   * Grid expands to show rows until it needs a scrollbar

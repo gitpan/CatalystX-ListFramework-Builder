@@ -3,13 +3,15 @@ NAME
     DBIx::Class, using Catalyst
 
 VERSION
-    This document refers to version 0.24 of
+    This document refers to version 0.27 of
     CatalystX::ListFramework::Builder
 
 WARNING
     This is an *ALPHA RELEASE*. I'd really appreciate any bug reports; you
     can use the CPAN RT bug tracking system, or email me (Oliver) directly
-    at the address at the bottom of this page.
+    at the address at the bottom of this page. Please also be aware that the
+    configuration file content has changed from previous releases of the
+    module.
 
 PURPOSE
     You have a database schema available through DBIx::Class, and wish to
@@ -22,13 +24,11 @@ PURPOSE
 SYNOPSIS
     A configuration file somewhere on your system:
 
-     # Config::General formal
      # [listframeworkuser.conf] in Config::General format
  
-     base         http://mywebserver.example.com
-     javascript   /javascript/extjs-2
+     extjs2   /javascript/extjs-2
  
-     <Model::DBIC>
+     <Model::LFB::DBIC>
          schema_class   My::Database::Schema
          connect_info   dbi:Pg:dbname=mydbname;host=mydbhost.example.com;
          connect_info   username
@@ -36,9 +36,9 @@ SYNOPSIS
          <connect_info>
              AutoCommit   1
          </connect_info>
-     </Model::DBIC>
+     </Model::LFB::DBIC>
 
-    And in the cgi-bin area of your web server:
+    And in the CGI area of your web server:
 
      package ListFrameworkUser;
      use Catalyst qw(ConfigLoader +CatalystX::ListFramework::Builder);
@@ -46,9 +46,8 @@ SYNOPSIS
      __PACKAGE__->setup;
      1;
 
-    Now going to "http://mywebserver.example.com/cgi-bin/tablename" will
-    render the web frontend for a table in your database. This can be much
-    refined; see "USAGE", below.
+    Now going to the CGI area's URL will display a list of the tables in
+    your database. Each item is a link to the web interface for that table.
 
 DESCRIPTION
     This module contains an application which will automatically construct a
@@ -88,13 +87,13 @@ USAGE
   "DBIx::Class" helpers
     When the web interface wants to display a column which references
     another table, you can make things look much better by adding a custom
-    render method to your "DBIx::Class" Result Sources (i.e. the class files
+    render method to your "DBIx::Class" Result Classes (i.e. the class files
     for each table).
 
     First, the application will look for a method called "display_name" and
-    use that. Here is an example which could be added to your Result Source
-    classes below the line which reads *DO NOT MODIFY THIS OR ANYTHING
-    ABOVE*, and in this case returns the data from the "title" column:
+    use that. Here is an example which could be added to your Result Class
+    files below the line which reads "DO NOT MODIFY THIS OR ANYTHING ABOVE",
+    and in this case returns the data from the "title" column:
 
      sub display_name {
          my $self = shift;
@@ -129,8 +128,8 @@ USAGE
     below, explaining what you'd like to see instead.
 
   Download and install ExtJS
-    You'll need to download the ExtJS Javascript Library (version 2.1 or
-    later) from this web page:
+    You'll need to download the ExtJS Javascript Library (version 2.2+
+    recommended), from this web page:
     <http://extjs.com/products/extjs/download.php>.
 
     Install it to your web server in a location that it is able to serve as
@@ -141,9 +140,8 @@ USAGE
   Application configuration file
     Create the application configuration file, an example of which is below:
 
-     base         http://mywebserver.example.com
-     javascript   /javascript/extjs-2
-     <Model::DBIC>
+     extjs2   /javascript/extjs-2
+     <Model::LFB::DBIC>
          schema_class   My::Database::Schema
          connect_info   dbi:Pg:dbname=mydbname;host=mydbhost.example.com;
          connect_info   username
@@ -151,18 +149,38 @@ USAGE
          <connect_info>
              AutoCommit   1
          </connect_info>
-     </Model::DBIC>
+     </Model::LFB::DBIC>
 
-    The application needs to know where your copy of ExtJS (version 2.1 or
-    later) is, on the web server. Use the "javascript" option as shown above
-    to specify the URL path to the libraries. This will be used in the
-    templates in some way like this:
+    The "Model::LFB::DBIC" section must look (and be named) exactly like
+    that above, except you should of course change the "schema_class" value
+    and the values within "connect_info".
 
-     <script type="text/javascript" src="[% c.base %][% c.javascript %]/ext-all.js" />
+    The application needs to know where your copy of ExtJS is, on the web
+    server. Use the "extjs2" option as shown above to specify the URL path
+    to the libraries. This will be used in the templates in some way like
+    this:
 
-    The "Model::DBIC" section must look (and be named) exactly like that
-    above, except you should of course change the "schema_class" value and
-    the values within "connect_info".
+     <script type="text/javascript" src="[% c.extjs2 %]/ext-all.js" />
+
+   Relocating LFB to another URL path
+    If you want to use this application as a plugin with another Catalyst
+    system, it should work fine, but you probably want to serve pages under
+    a different path on your web site. To do that, add the following to your
+    configuration file:
+
+     <Controller::LFB::Root>
+         <action>
+             <base>
+                 PathPart   admin
+             </base>
+         </action>
+     </Controller::LFB::Root>
+
+    In the above example, the path ".../admin/" will contain the LFB
+    application, and all generated links in LFB will also make use of that
+    path. Remember this is added to the "base" of your Cataylst application
+    which, depending on your web server configuration, might also have a
+    leading path.
 
   Catalyst application
     The final step is to write a very small file which allows this module to
@@ -191,7 +209,8 @@ USAGE
     Presumably the location of the Catalyst application created in the
     previous section maps to a particular URL path. Follow this path with
     the name of a table in the database, and you should be presented with a
-    table of data.
+    table of data. If you omit the table name, then the application prompts
+    you with a list of the available tables.
 
 EXAMPLES
     There is an "examples" directory included with this distribution which
@@ -203,12 +222,19 @@ LIMITATIONS
         There's no support for multiple column primary keys
         (composite/compound keys). This has saved a lot of time in
         development because it greatly simplifies the Catalyst and
-        DBIx::Class code. However if you're desperate for this feature, drop
-        me a line because you might be able to buy some of my time to do the
-        work required.
+        DBIx::Class code.
+
+    No two columns in a given table may have the same FK constraint
+        If you have two columns which both have foreign key constraints to
+        the same table, it's very likely LFB will not work. Again this is a
+        simplification which speeded the initial development.
+
+    For the issues above, if you're desperate that the feature be
+    implemented soon, please drop me a line at the address below, because
+    you might be able to buy some of my time for the development.
 
 REQUIREMENTS
-    *   ExtJS Javascript Library version 2.1 or later, from
+    *   ExtJS Javascript Library (version 2.2+ recommended), from
         <http://extjs.com>.
 
     *   Catalyst::Runtime >= 5.70
@@ -218,6 +244,8 @@ REQUIREMENTS
     *   Catalyst::View::JSON
 
     *   Catalyst::View::TT
+
+    *   Catalyst::Action::RenderView
 
     *   Class::C3
 

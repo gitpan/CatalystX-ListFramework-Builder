@@ -12,6 +12,7 @@ WriteMakefile(
         Catalyst::Model::DBIC::Schema => 0,
         Catalyst::View::JSON => 0,
         Catalyst::View::TT => 0,
+        Catalyst::Action::RenderView => 0,
         Class::C3 => 0,
     },
 

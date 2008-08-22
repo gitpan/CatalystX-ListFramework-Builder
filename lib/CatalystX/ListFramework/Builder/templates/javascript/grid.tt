@@ -210,12 +210,12 @@
 
                     if (bb > vph) {
                         this.el.setSize(vw, vph);
-                        this.scroller.setSize(vw, vh);
                     }
                     else {
-                        this.el.setSize(vw, bb - 40);
-                        //this.scroller.setSize(vw, bb - 40);
+                        vh = bb - 40;
+                        this.el.setSize(vw, vh);
                     }
+                    this.scroller.setSize(vw, vh);
                 }
             }else{
                 this.el.setSize(csize.width, csize.height);
@@ -243,7 +243,6 @@
 
     var grid = new Ext.grid.EditorGridPanel({
         id: 'search-grid'
-        ,el: 'list-grid'
         ,autoHeight: true
         ,stripeRows: true
         ,title: '[% title %]'

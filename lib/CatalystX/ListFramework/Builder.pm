@@ -6,7 +6,7 @@ use warnings FATAL => 'all';
 use Class::C3;
 use Devel::InnerPackage qw/list_packages/;
 
-our $VERSION = 0.25;
+our $VERSION = 0.27;
 
 sub setup_components {
     my $class = shift;
@@ -67,7 +67,7 @@ DBIx::Class, using Catalyst
 
 =head1 VERSION
 
-This document refers to version 0.25 of CatalystX::ListFramework::Builder
+This document refers to version 0.27 of CatalystX::ListFramework::Builder
 
 =head1 WARNING
 
@@ -155,12 +155,12 @@ your Perl Include path.
 
 When the web interface wants to display a column which references another
 table, you can make things look much better by adding a custom render method
-to your C<DBIx::Class> Result Sources (i.e. the class files for each table).
+to your C<DBIx::Class> Result Classes (i.e. the class files for each table).
 
 First, the application will look for a method called C<display_name> and use
-that. Here is an example which could be added to your Result Source classes
-below the line which reads C<DO NOT MODIFY THIS OR ANYTHING ABOVE>, and in
-this case returns the data from the C<title> column:
+that. Here is an example which could be added to your Result Class files below
+the line which reads C<DO NOT MODIFY THIS OR ANYTHING ABOVE>, and in this case
+returns the data from the C<title> column:
 
  sub display_name {
      my $self = shift;
@@ -329,6 +329,10 @@ Catalyst::View::JSON
 =item *
 
 Catalyst::View::TT
+
+=item *
+
+Catalyst::Action::RenderView
 
 =item *
 

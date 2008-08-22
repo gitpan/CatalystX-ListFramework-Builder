@@ -26,8 +26,8 @@ lib/CatalystX/ListFramework/Builder/templates/javascript/grid.tt
 lib/CatalystX/ListFramework/Builder/templates/javascript/store.tt
 lib/CatalystX/ListFramework/Builder/templates/tables.tt
 lib/CatalystX/ListFramework/Builder/templates/style.tt
+lib/CatalystX/ListFramework/Builder/templates/style_err.tt
 lib/CatalystX/ListFramework/Builder/templates/iefix.tt
-lib/CatalystX/ListFramework/Builder/templates/list-and-search.tt
 lib/CatalystX/ListFramework/Builder/templates/list.tt
 lib/CatalystX/ListFramework/Builder/templates/helloworld.tt
 lib/CatalystX/ListFramework/Builder/Controller/Root.pm

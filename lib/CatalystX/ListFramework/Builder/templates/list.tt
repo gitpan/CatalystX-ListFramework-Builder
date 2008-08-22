@@ -1,3 +1,5 @@
+<!-- TEMPLATE OK -->
+
 <script type="text/javascript">
 
 Ext.onReady(function(){
@@ -34,5 +36,3 @@ Ext.onReady(function(){
 
 [% PROCESS style.tt %]
 [% PROCESS iefix.tt IF c.req.user_agent.match('\.NET CLR') %]
-
-<div id="list-grid"></div>

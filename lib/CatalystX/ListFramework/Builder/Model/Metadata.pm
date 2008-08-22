@@ -52,7 +52,7 @@ sub process {
     # no table specified
     return if !scalar @parts;
 
-    my $try_moniker = _qualify2package(@parts);
+    my $try_moniker = _qualify2moniker(@parts);
     $lf->{model} = _moniker2model($c, $try_moniker);
 
     # don't know the requested table
@@ -123,6 +123,7 @@ sub _build_table_info {
     # consider table columns
     foreach my $col (@cols) {
         my $info = $source->column_info($col);
+        next unless defined $info;
 
         $ti->{cols}->{$col} = {
             heading      => _2title($col),
@@ -132,10 +133,10 @@ sub _build_table_info {
         };
 
         $ti->{cols}->{$col}->{default_value} = $info->{default_value}
-            if $info->{default_value} and $ti->{cols}->{$col}->{editable};
+            if ($info->{default_value} and $ti->{cols}->{$col}->{editable});
 
         $ti->{cols}->{$col}->{extjs_xtype} = $xtype_for{ $info->{data_type} }
-            if exists $xtype_for{ $info->{data_type} };
+            if (exists $info->{data_type} and exists $xtype_for{ $info->{data_type} });
     }
 
     # extra data for foreign key columns
@@ -181,24 +182,33 @@ sub _build_table_info {
     }
 }
 
-sub _anydbmodel {
-    my $c = shift;
-    return first { $_ =~ m/^LFB::DBIC::/i } $c->models;
-}
-
-sub _moniker2model {
-    my ($c, $moniker) = @_;
-    return first { $_ =~ m/^(?:\w+::){0,}$moniker$/i } $c->models;
-}
-
-sub _qualify2package {
+# turn table from user into a moniker
+sub _qualify2moniker {
     return join '::', map { join '', map ucfirst, split /[\W_]+/, lc } @_;
         # from DBIx::Class::Schema::Loader::Base::_table2moniker
 }
 
-# make friendly human readable title for this table
+# find the LFB::DBIC model for a given Result Source moniker
+sub _moniker2model {
+    my ($c, $moniker) = @_;
+    $moniker =~ s/_//g; # those not using ::Loader can have underscores
+
+    foreach my $orig ($c->models) {
+        (my $m = $orig) =~ s/_//g; # canonicalize
+        return $orig if $m =~ m/^(?:\w+::){0,}$moniker$/i;
+    }
+    return undef;
+}
+
+# model or package name to url path
+sub _m2path {
+    return join '/', map lc, split '::', shift;
+}
+
+# model or package name to human title
 sub _m2title {
     my $model = shift;
+    $model =~ s/_//g; # those not using ::Loader can have underscores
 
     my @title = split '::', $model;
     shift @title while $title[0] =~ m/^(?:LFB|DBIC)$/i; # drop Model namespace
@@ -206,12 +216,15 @@ sub _m2title {
     return join ' ', @title;
 }
 
-sub _m2path {
-    return join '/', map lc, split '::', shift;
-}
-
+# col/table name to human title
 sub _2title {
     return join ' ', map ucfirst, split /[\W_]+/, lc shift;
+}
+
+# find any model which is (probably) one of our result classes
+sub _anydbmodel {
+    my $c = shift;
+    return first { $_ =~ m/^LFB::DBIC::/i } $c->models;
 }
 
 1;
