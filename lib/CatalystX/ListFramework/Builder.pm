@@ -6,7 +6,7 @@ use warnings FATAL => 'all';
 use Class::C3;
 use Devel::InnerPackage qw/list_packages/;
 
-our $VERSION = 0.27;
+our $VERSION = 0.28;
 
 sub setup_components {
     my $class = shift;
@@ -15,7 +15,7 @@ sub setup_components {
     # these are the boilerplate Catalyst components for ListFramework
     my @packages = qw(
         Controller::Root
-        Controller::Image
+        Controller::Static
         Controller::AJAX
         Model::DBIC
         Model::Metadata
@@ -67,7 +67,7 @@ DBIx::Class, using Catalyst
 
 =head1 VERSION
 
-This document refers to version 0.27 of CatalystX::ListFramework::Builder
+This document refers to version 0.28 of CatalystX::ListFramework::Builder
 
 =head1 WARNING
 
@@ -362,7 +362,11 @@ Oliver Gorwits C<< <oliver.gorwits@oucs.ox.ac.uk> >>
 Bundled images are Copyright (c) 2006 Mark James, and are from
 L<http://www.famfamfam.com/lab/icons/silk/>.
 
-The rest is Copyright (c) Oliver Gorwits 2008. All Rights Reserved.
+This distribution ships with the Ext.ux.form.DateTime Extension Class for Ext
+2.x Library, Copyright (c) 2008, Ing. Jozef Sakalos, and released under the
+LGPL 3.0 license (library version 289, 2008-06-12 21:08:08).
+
+The rest is Copyright (c) Oliver Gorwits 2008.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of version 2 of the GNU General Public License as published by the

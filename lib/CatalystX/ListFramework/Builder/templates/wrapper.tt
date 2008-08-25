@@ -10,6 +10,7 @@
 <link rel="stylesheet" type="text/css" href="[% c.config.extjs2 %]/resources/css/ext-all.css" />
 <script type="text/javascript" src="[% c.config.extjs2 %]/adapter/ext/ext-base.js"></script>
 <script type="text/javascript" src="[% c.config.extjs2 %]/ext-all.js"></script>
+<script type="text/javascript" src="[% c.uri_for( c.controller('LFB::Static').action_for('static'), "xdatetime.js" ) %]"></script>
 </head>
 <body class="xtheme-gray">
 

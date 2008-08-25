@@ -1,4 +1,4 @@
-package CatalystX::ListFramework::Builder::Controller::Image;
+package CatalystX::ListFramework::Builder::Controller::Static;
 
 use strict;
 use warnings FATAL => 'all';
@@ -8,11 +8,16 @@ use base 'Catalyst::Controller';
 use File::stat;
 use File::Basename;
 
+my %mime = (
+    png => 'image/png',
+    js  => 'application/x-javascript',
+);
+
 # erm, this is a bit sick. it's basically Catalyst::Plugin::Static on the
 # cheap. there are a couple of nice icons we want to make sure the users have
 # but it'd be too much hassle to ask them to install, so we bundle them.
 #
-sub image : Chained('/lfb/root/base') Args(1) {
+sub static : Chained('/lfb/root/base') Args(1) {
     my ($self, $c, $file) = @_;
 
     (my $pkg_path = __PACKAGE__) =~ s{::}{/}g;
@@ -20,9 +25,10 @@ sub image : Chained('/lfb/root/base') Args(1) {
         $INC{ $pkg_path .'.pm' }
     );
 
-    my $path = "$directory../images/$file";
+    my $path = "$directory../static/$file";
 
-    if ( ($file =~ m/^\w+\.png$/i) and (-f $path) ) {
+    if ( ($file =~ m/^\w+\.(\w{2,3})$/i) and (-f $path) ) {
+        my $ext = $1;
         my $stat = stat($path);
 
         if ( $c->req->headers->header('If-Modified-Since') ) {
@@ -34,20 +40,27 @@ sub image : Chained('/lfb/root/base') Args(1) {
             }
         }
 
+        if (!exists $mime{$ext}) {
+            $c->log->debug(qq{No mime type for "$file"}) if $c->debug;
+            $c->res->status(415);
+            return 0;
+        }
+
         my $content = do { local (@ARGV, $/) = $path; <> };
-        $c->res->headers->content_type('image/png');
+        $c->res->headers->content_type($mime{$ext});
         $c->res->headers->content_length( $stat->size );
         $c->res->headers->last_modified( $stat->mtime );
         $c->res->output($content);
         if ( $c->config->{static}->{no_logs} && $c->log->can('abort') ) {
            $c->log->abort( 1 );
         }
-        $c->log->debug(qq{Serving file "$path" as "image/png"}) if $c->debug;
+        $c->log->debug(qq{Serving file "$file" as }
+            . $c->res->headers->content_type) if $c->debug;
         $c->res->status(200);
         return 1;
     }
 
-    $c->log->debug(qq/Failed to serve file "$path"/) if $c->debug;
+    $c->log->debug(qq{Failed to serve file "$file"}) if $c->debug;
     $c->res->status(404);
     return 0;
 }

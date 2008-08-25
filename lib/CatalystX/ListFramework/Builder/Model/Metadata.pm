@@ -15,14 +15,20 @@ my %xtype_for = (
 $xtype_for{$_} = 'numberfield' for (
     'bigint',
     'bigserial',
+    'dec',
     'decimal',
     'double precision',
+    'float',
+    'int',
     'integer',
+    'mediumint',
     'money',
     'numeric',
     'real',
     'smallint',
     'serial',
+    'tinyint',
+    'year',
 );
 
 $xtype_for{$_} = 'timefield' for ( 
@@ -31,9 +37,12 @@ $xtype_for{$_} = 'timefield' for (
     'time with time zone',
 );
 
-$xtype_for{$_} = 'datefield' for (
+$xtype_for{$_} = 'datefield' for ( 
     'date',
-    'DATE',
+);
+
+$xtype_for{$_} = 'xdatetime' for (
+    'datetime',
     'timestamp',
     'timestamp without time zone',
     'timestamp with time zone',
@@ -135,8 +144,8 @@ sub _build_table_info {
         $ti->{cols}->{$col}->{default_value} = $info->{default_value}
             if ($info->{default_value} and $ti->{cols}->{$col}->{editable});
 
-        $ti->{cols}->{$col}->{extjs_xtype} = $xtype_for{ $info->{data_type} }
-            if (exists $info->{data_type} and exists $xtype_for{ $info->{data_type} });
+        $ti->{cols}->{$col}->{extjs_xtype} = $xtype_for{ lc($info->{data_type}) }
+            if (exists $info->{data_type} and exists $xtype_for{ lc($info->{data_type}) });
     }
 
     # extra data for foreign key columns

@@ -68,7 +68,7 @@
                     ,pageSize: 5
                     ,triggerAction: 'all'
                     ,store: new Ext.data.JsonStore({
-                        url: '[% c.uri_for( c.controller('LFB::Root').action_for('no_table'), info.path, "get_stringified" ) %]'
+                        url: '[% c.uri_for( c.controller('LFB::Root').action_for('no_table'), info.path, "list_stringified" ) %]'
                         ,root: 'rows' ,totalProperty: 'total'
                         ,fields: [ 'dbid', 'stringified' ]
                         ,listeners: {
@@ -85,8 +85,14 @@
                     ,xtype: '[% info.cols.$field.extjs_xtype OR "textfield" %]'
 
                     [% SWITCH info.cols.$field.extjs_xtype %]
+                    [% CASE 'timefield' %]
+                    ,format: 'H:i:s'
                     [% CASE 'datefield' %]
                     ,format: 'Y-m-d'
+                    [% CASE 'xdatetime' %]
+                    ,otherToNow: false
+                    ,dateFormat: 'Y-m-d'
+                    ,timeFormat: 'H:i:s'
                     [% END %]
                   [% END %]
                 }

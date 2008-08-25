@@ -17,10 +17,10 @@
               [% IF lf.main.cols.$col.extjs_xtype == 'checkbox' %]
                 if (value == '(click to add filter)') { return '' }
                 if (value == '1') {
-                  return '<img src="[% c.uri_for( c.controller('LFB::Image').action_for('image'), "bullet_green.png" ) %]" />';
+                  return '<img src="[% c.uri_for( c.controller('LFB::Static').action_for('static'), "bullet_green.png" ) %]" />';
                 }
                 else {
-                  return '<img src="[% c.uri_for( c.controller('LFB::Image').action_for('image'), "bullet_red.png" ) %]" />';
+                  return '<img src="[% c.uri_for( c.controller('LFB::Static').action_for('static'), "bullet_red.png" ) %]" />';
                 }
               [% ELSE %]
                 return value;
@@ -44,7 +44,7 @@
                         + (record.get('[% col %]').join(',<br />') || '(none)') + '"';
                     return '<img ext:qtitle="[% lf.main.mfks.item(col) %]" ext:qtip="'
                         + (record.get('[% col %]').join(',<br />') || '(none)')
-                        + '" src="[% c.uri_for( c.controller('LFB::Image').action_for('image'), "magnifier.png" ) %]" />'
+                        + '" src="[% c.uri_for( c.controller('LFB::Static').action_for('static'), "magnifier.png" ) %]" />'
                         + ' Show';
                 }
             }
@@ -64,7 +64,7 @@
                         + ' [% lf.main.pk %](' + record.get('[% lf.main.pk %]') + ')"';
                     return '<img ext:qtitle="Delete" ext:qtip="'
                         + ' [% lf.main.pk %](' + record.get('[% lf.main.pk %]') + ')"'
-                        + ' src="[% c.uri_for( c.controller('LFB::Image').action_for('image'), "bin_closed.png" ) %]" />';
+                        + ' src="[% c.uri_for( c.controller('LFB::Static').action_for('static'), "bin_closed.png" ) %]" />';
                 }
             }
         }
@@ -79,7 +79,7 @@
             {
                 text: 'Clear Filters'
                 ,cls: 'x-btn-text-icon'
-                ,icon: '[% c.uri_for( c.controller('LFB::Image').action_for('image'), "bin_closed.png" ) %]'
+                ,icon: '[% c.uri_for( c.controller('LFB::Static').action_for('static'), "bin_closed.png" ) %]'
                 // XXX private method to refresh
                 ,handler: function (){
                     store.baseParams = {}; // clear search opts
@@ -89,7 +89,7 @@
             ,' ' ,{
                 text: 'Apply Filters'
                 ,cls: 'x-btn-text-icon'
-                ,icon: '[% c.uri_for( c.controller('LFB::Image').action_for('image'), "find.png" ) %]'
+                ,icon: '[% c.uri_for( c.controller('LFB::Static').action_for('static'), "find.png" ) %]'
                 ,handler: function (){
                     var params = {};
                     var searchrow = grid.getStore().getAt(0).data;
@@ -108,7 +108,7 @@
             ,'->' ,{
                 text: 'Add New [% lf.main.title %]'
                 ,cls: 'x-btn-text-icon'
-                ,icon: '[% c.uri_for( c.controller('LFB::Image').action_for('image'), "add.png" ) %]'
+                ,icon: '[% c.uri_for( c.controller('LFB::Static').action_for('static'), "add.png" ) %]'
                 ,handler: function(){
                     // draw the window!
                     var win = generate_win();

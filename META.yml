@@ -1,16 +1,29 @@
-# http://module-build.sourceforge.net/META-spec.html
-#XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
-name:         CatalystX-ListFramework-Builder
-version:      0.27
-version_from: lib/CatalystX/ListFramework/Builder.pm
-installdirs:  site
-requires:
-    Catalyst::Action::RenderView:  0
-    Catalyst::Model::DBIC::Schema: 0
-    Catalyst::Runtime:             5.7
-    Catalyst::View::JSON:          0
-    Catalyst::View::TT:            0
-    Class::C3:                     0
-
+---
+abstract: 'Instant AJAX web front-end for'
+author:
+  - 'Oliver Gorwits C<< <oliver.gorwits@oucs.ox.ac.uk> >>'
+build_requires:
+  Test::More: 0
+  Test::WWW::Mechanize: 1.16
+  Test::WWW::Mechanize::Catalyst: 0.42
 distribution_type: module
-generated_by: ExtUtils::MakeMaker version 6.30_01
+generated_by: 'Module::Install version 0.77'
+license: gpl
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
+name: CatalystX-ListFramework-Builder
+no_index:
+  directory:
+    - inc
+    - t
+    - examples
+requires:
+  Catalyst::Action::RenderView: 0
+  Catalyst::Model::DBIC::Schema: 0
+  Catalyst::Runtime: 5.70
+  Catalyst::View::JSON: 0
+  Catalyst::View::TT: 0
+  Class::C3: 0
+  perl: 5.8.1
+version: 0.28

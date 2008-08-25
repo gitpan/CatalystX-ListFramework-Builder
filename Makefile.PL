@@ -1,27 +1,19 @@
-use 5.008004;
-use ExtUtils::MakeMaker;
+use inc::Module::Install 0.67;
+perl_version '5.008001';
+  
+name           'CatalystX-ListFramework-Builder';
+all_from       'lib/CatalystX/ListFramework/Builder.pm';
 
-# See lib/ExtUtils/MakeMaker.pm for details of how to influence
-# the contents of the Makefile that is written.
+requires       'Catalyst::Runtime' => '5.70';
+requires       'Catalyst::Model::DBIC::Schema' => 0;
+requires       'Catalyst::View::JSON' => 0;
+requires       'Catalyst::View::TT' => 0;
+requires       'Catalyst::Action::RenderView' => 0;
+requires       'Class::C3' => 0;
 
-WriteMakefile(
-    NAME              => 'CatalystX::ListFramework::Builder',
-    VERSION_FROM      => 'lib/CatalystX/ListFramework/Builder.pm', # finds $VERSION
-    PREREQ_PM         => {
-        Catalyst::Runtime => 5.70,
-        Catalyst::Model::DBIC::Schema => 0,
-        Catalyst::View::JSON => 0,
-        Catalyst::View::TT => 0,
-        Catalyst::Action::RenderView => 0,
-        Class::C3 => 0,
-    },
+test_requires  'Test::More' => 0;
+test_requires  'Test::WWW::Mechanize' => '1.16';
+test_requires  'Test::WWW::Mechanize::Catalyst' => '0.42';
 
-    ($] >= 5.005 ?     ## Add these new keywords supported since 5.005
-      (ABSTRACT_FROM  => 'lib/CatalystX/ListFramework/Builder.pm',
-       AUTHOR         => 'Oliver Gorwits <oliver.gorwits@oucs.ox.ac.uk>') : ()),
-
-    dist        => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
-    clean       => { FILES => 'Catalyst-ListFramework-Builder-*' },
-    realclean   => { FILES => 'Makefile.old' },
-);
+WriteAll;
 
