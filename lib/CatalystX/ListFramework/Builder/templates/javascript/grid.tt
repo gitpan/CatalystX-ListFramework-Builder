@@ -342,9 +342,9 @@
 
                     // fill in reverse relations
                     mainform.setValues({
+                      [% SET count = 1 %]
                       [% FOREACH table IN lf.tab_order.keys %]
                       [% NEXT IF lf.tab_order.item(table) == 1 %]
-                        [% SET count = 1 %]
                         [% FOREACH col IN lf.table_info.$table.cols.keys %]
                         [% NEXT UNLESS lf.table_info.$table.cols.$col.is_fk
                                 AND NOT lf.table_info.$table.cols.$col.editable %]

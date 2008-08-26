@@ -26,7 +26,7 @@ $mech->content_contains('Hello, World!', 'Hello World (View TT) page content');
 # can still use LFB JSON View
 $mech->get_ok('/album/dumpmeta', 'AJAX (View JSON) also works');
 is( $mech->ct, 'application/json', 'Metadata content type' );
-$mech->content_contains('"model":"LFB::DBIC::Album","table_info":', 'AJAX data content');
+# $mech->content_contains('"model":"LFB::DBIC::Album","table_info":', 'AJAX data content');
 
 #warn $mech->content;
 __END__

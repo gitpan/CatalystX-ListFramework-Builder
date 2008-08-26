@@ -26,4 +26,4 @@ requires:
   Catalyst::View::TT: 0
   Class::C3: 0
   perl: 5.8.1
-version: 0.28
+version: 0.29
