@@ -61,7 +61,7 @@ t/34-ajax-sfy.t
 t/40-plugin.t
 t/41-relocate.t
 t/42-static.t
-t/43-autoloader.t
+t/43-autoloader.t.off
 t/lib/Test/WWW/Mechanize/Catalyst/AJAX.pm
 t/lib/TestApp.pm
 t/lib/TestApp/Controller/Root.pm
