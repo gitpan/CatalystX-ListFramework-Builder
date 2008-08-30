@@ -12,7 +12,7 @@ BEGIN { use_ok "Test::WWW::Mechanize::Catalyst" => "TestApp" }
 my $mech = Test::WWW::Mechanize::Catalyst->new;
 
 # get metadata for the copyright table
-$mech->get_ok( '/copyright/dumpmeta', 'Get copyright listframework metadata' );
+$mech->get_ok( '/dbic/copyright/dumpmeta', 'Get copyright listframework metadata' );
 is( $mech->ct, 'application/json', 'Metadata content type' );
 
 my $response = JSON::from_json( $mech->content );
@@ -55,7 +55,7 @@ my $expected = {
     'table2path' => {
         'Album'        => 'album',
         'Copyright'    => 'copyright',
-        'Sleeve Notes' => 'sleevenotes',
+        'Sleeve Notes' => 'sleeve_notes',
         'Track'        => 'track',
         'Artist'       => 'artist'
     },
@@ -87,7 +87,18 @@ my $expected = {
                 'heading'     => 'Id'
             }
         }
-    }
+    },
+    'path2model' => {
+        'dbic' => {
+            'sleeve_notes' => 'SleeveNotes',
+            'artist'       => 'Artist',
+            'album'        => 'Album',
+            'track'        => 'Track',
+            'copyright'    => 'Copyright'
+        }
+    },
+    'db2path'      => { 'Dbic' => 'dbic' },
+    'dbpath2model' => { 'dbic' => 'LFB::DBIC' },
 };
 
 is_deeply( $response, $expected, 'Metadata is as we expect' );

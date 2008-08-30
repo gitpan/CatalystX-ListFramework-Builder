@@ -1,3 +1,21 @@
+libcatalystx-listframework-builder (0.31) UNRELEASED; urgency=low
+
+  * Scans Models and loads any which are DBICish, Model::LFB::DBIC now optional
+  * Supports multiple Schema (databases) being loaded
+  * "Home" page with selector for databases and tables
+  * Will load Schema on the fly from DB if schema_class is not provided
+  * Allow Static handler to serve CSS (add mime type)
+  * Filter/search row is now added server-side rather than via ExtJS hacks -
+    this is much cleaner, simpler to implement, and allows grid resizing to work
+  * Move stylesheets from being in-line TT files, to their own served CSS
+  * Add header and footer information to all pages
+  * Remove ExtJS ViewPort, and render Grid directly to a Div
+  * Split javascript sources into more templates, as they've grown quite large
+  * Update POD to describe new use cases
+  * Change License to Artistic/GPL (previously only GPL2, by mistake)
+
+ -- Oliver Gorwits <oliver.gorwits@oucs.ox.ac.uk>  Thu, 28 Aug 2008 15:15:32 +0100
+
 libcatalystx-listframework-builder (0.29) UNRELEASED; urgency=low
 
   * Bug fix for missing commas in templated javascript (thanks to nigel)

@@ -6,7 +6,8 @@ use warnings FATAL => 'all';
 use Class::C3;
 use Devel::InnerPackage qw/list_packages/;
 
-our $VERSION = 0.29;
+our $VERSION = '0.31';
+$VERSION = eval $VERSION; # numify for warning-free dev releases
 
 sub setup_components {
     my $class = shift;
@@ -17,11 +18,38 @@ sub setup_components {
         Controller::Root
         Controller::Static
         Controller::AJAX
-        Model::DBIC
         Model::Metadata
         View::JSON
         View::TT
     );
+
+    # will auto-load other models, so this one is not -required-
+    if (exists $class->config->{'Model::LFB::DBIC'}) {
+        push @packages, 'Model::DBIC';
+        my $p = 'Model::LFB::DBIC';
+
+        # on the fly schema engineering
+        if (!exists $class->config->{$p}->{schema_class}) {
+            require DBIx::Class::Schema::Loader;
+            die "Must have DBIx::Class::Schema::Loader version greater than 0.04005"
+                if eval "$DBIx::Class::Schema::Loader::VERSION" <= 0.04005;
+
+            DBIx::Class::Schema::Loader::make_schema_at(
+                'LFB::Loader::Schema', {},
+                $class->config->{$p}->{connect_info},
+            );
+
+            eval qq{
+                package LFB::Loader::Schema;
+                use base 'DBIx::Class::Schema';
+                LFB::Loader::Schema->load_classes();
+                1;
+            };
+            $INC{'LFB/Loader/Schema.pm'} = 'loaded';
+
+            $class->config->{$p}->{schema_class} = 'LFB::Loader::Schema';
+        }
+    }
 
     foreach my $orig (@packages) {
         (my $p = $orig) =~ s/::/::LFB::/;
@@ -67,7 +95,7 @@ DBIx::Class, using Catalyst
 
 =head1 VERSION
 
-This document refers to version 0.29 of CatalystX::ListFramework::Builder
+This document refers to version 0.31 of CatalystX::ListFramework::Builder
 
 =head1 WARNING
 
@@ -78,9 +106,8 @@ configuration file content has changed from previous releases of the module.
 
 =head1 PURPOSE
 
-You have a database schema available through L<DBIx::Class>, and wish to have
-a basic web interface supporting Create, Retrieve, Update, Delete and Search,
-with little effort.
+You have a database, and wish to have a basic web interface supporting Create,
+Retrieve, Update, Delete and Search, with little effort.
 
 This module, with only a few lines of configuration, is able to create such
 interfaces on the fly. They are a bit whizzy and all Web 2.0-ish.
@@ -124,34 +151,160 @@ The interface is not written to static files on your system, and uses AJAX to
 act upon the database without reloading your web page (much like other
 Web 2.0 appliactions, for example Google Mail).
 
-The goals of the system are to require as little repetition of effort on your
-part as possible - the DRY principle (Don't Repeat Yourself). Almost all the
-information required is retrieved from the L<DBIx::Class> ORM frontend to your
-database, which it is expected that you have already set up (although see
-L</USAGE>, below). This means that any change in database schema ought to be
-reflected immediately in the web interface after a page refresh.
+Almost all the information required by the application is retrieved from the
+L<DBIx::Class> ORM frontend to your database, which it is expected that you
+have already set up (although see L</USAGE>, below). This means that any
+change in database schema ought to be reflected immediately in the web
+interface after a page refresh.
 
 =head1 USAGE
 
-=head2 C<DBIx::Class> setup
+=head2 Pre-configuration
 
-You will need C<DBIx::Class> schema to be created and installed on your
-system. The recommended way to do this quickly is to use the excellent
+You'll need to download the ExtJS Javascript Library (version 2.2+
+recommended), from this web page:
+L<http://extjs.com/products/extjs/download.php>.
+
+Install it to your web server in a location that it is able to serve as static
+content. Make a note of the path used in a URL to retrieve this content, as it
+will be needed in the application configuration file, below.
+
+=head2 Scenario 1: Plugin to an existing Catalyst App
+
+This mode is for when you have written your Catalyst application, but the
+Views are catering for the users and as an admin you'd like a more direct,
+secondary web interface to the database.
+
+ package ListFrameworkUser;
+ use Catalyst qw(ConfigLoader +CatalystX::ListFramework::Builder);
+ 
+ __PACKAGE__->setup;
+ 1;
+
+Adding C<CatalystX::ListFramework::Builder> (LFB) as a plugin to your Catalyst
+application, as above, causes it to scan your existing Models. If any of them
+are built using L<Catalyst::Model::DBIC::Schema>, they are automatically
+loaded. You still need to provide a small amount of configuration:
+
+ extjs2   /javascript/extjs-2
+ <Controller::LFB::Root>
+     <action>
+         <base>
+             PathPart   admin
+         </base>
+     </action>
+ </Controller::LFB::Root>
+
+First the application needs to know where your copy of ExtJS is, on the web
+server.  Use the C<extjs2> option as shown above to specify the URL path to
+the libraries. This will be used in the templates in some way like this:
+
+ <script type="text/javascript" src="[% c.config.extjs2 %]/ext-all.js" />
+
+In the above example, the path C<...E<sol>adminE<sol>> will contain the LFB
+application, and all generated links in LFB will also make use of that path.
+Remember this is added to the C<base> of your Cataylst application which,
+depending on your web server configuration, might also have a leading path.
+
+This mode of operation works even if you have more than one database. You will
+be offered a Home screen to select the database, and then another menu to
+select the table within that.
+
+=head2 Scenario 2: Frontend for an existing C<DBIx::Class::Schema> based class
+
+In this mode, C<CatalystX::ListFramework::Builder> (LFB) is running
+standalone, in a sense as the Catalyst application itself. Your main
+application file looks the same as in Scenario 1, though:
+
+ package ListFrameworkUser;
+ use Catalyst qw(ConfigLoader +CatalystX::ListFramework::Builder);
+ 
+ __PACKAGE__->setup;
+ 1;
+
+For the configuration, you need to tell LFB which package contains the
+C<DBIx::Class> schema, and also provide database connection parameters.
+
+ extjs2   /javascript/extjs-2
+ <Model::LFB::DBIC>
+     schema_class   My::Database::Schema
+     connect_info   dbi:Pg:dbname=mydbname;host=mydbhost.example.com;
+     connect_info   username
+     connect_info   password
+     <connect_info>
+         AutoCommit   1
+     </connect_info>
+ </Model::LFB::DBIC>
+
+First the application needs to know where your copy of ExtJS is, on the web
+server.  Use the C<extjs2> option as shown above to specify the URL path to
+the libraries. This will be used in the templates in some way like this:
+
+ <script type="text/javascript" src="[% c.config.extjs2 %]/ext-all.js" />
+
+The C<Model::LFB::DBIC> section must look (and be named) exactly like that
+above, except you should of course change the C<schema_class> value and the
+values within C<connect_info>.
+
+=head3 C<DBIx::Class> setup
+
+You will of course need the C<DBIx::Class> schema to be created and installed
+on your system. The recommended way to do this quickly is to use the excellent
 L<DBIx::Class::Schema::Loader> module which connects to your database and
 writes C<DBIx::Class> Perl modules for it.
 
 Pick a suitable namespace for your schema, which is not related to this
 application. For example C<DBIC::Database::Foo::Schema> for the C<Foo>
-database. Then use the following command-line incantation:
+database (in the configuration example above we used C<My::Database::Schema>).
+Then use the following command-line incantation:
 
  perl -MDBIx::Class::Schema::Loader=make_schema_at,dump_to_dir:. -e \
-     'make_schema_at("DBIC::Database::Foo::Schema", { relationships => 1 }, \
+     'make_schema_at("DBIC::Database::Foo::Schema", { debug => 1 }, \
      ["dbi:Pg:dbname=foodb;host=mydbhost.example.com","user","pass" ])'
 
 This will create a directory (such as C<DBIC>) which you need to move into
-your Perl Include path.
+your Perl Include path (one of the paths shown at the end of C<perl -V>).
 
-=head2 C<DBIx::Class> helpers
+=head2 Scenario 3: Lazy loading a C<DBIx::Class> schema
+
+If you're in such a hurry that you can't create the C<DBIx::Class> schema, as
+shown in the previous section, then C<CatalystX::ListFramework::Builder> (LFB)
+is able to do this on the fly, but it will slow the application down a little.
+
+The application file and configuration are very similar to those in Scenario
+2, above, except that you omit the C<schema_class> configuration option
+because you want LFB to generate that on the fly (rather than reading an
+existing one from disk).
+
+ package ListFrameworkUser;
+ use Catalyst qw(ConfigLoader +CatalystX::ListFramework::Builder);
+ 
+ __PACKAGE__->setup;
+ 1;
+
+ extjs2   /javascript/extjs-2
+ <Model::LFB::DBIC>
+     connect_info   dbi:Pg:dbname=mydbname;host=mydbhost.example.com;
+     connect_info   username
+     connect_info   password
+     <connect_info>
+         AutoCommit   1
+     </connect_info>
+ </Model::LFB::DBIC>
+
+When LFB loads it will connect to the database and use the
+L<DBIx::Class::Schema::Loader> module to reverse engineer its schema. To work
+properly you'll need the very latest version of that module (0.05 or greater).
+
+The other drawback to this scenario (other than the slower operation) is that
+you have no ability to customize how foreign, related records are shown.  A
+related record will simply be represented as something approximating the name
+of the foreign table, the names of the primary keys, and associated values
+(e.g. C<id(5)>).
+
+=head1 TIPS AND TRICKS
+
+=head2 Representing related records
 
 When the web interface wants to display a column which references another
 table, you can make things look much better by adding a custom render method
@@ -181,54 +334,22 @@ foreign row. This is something approximating the name of the foreign table,
 the names of the primary keys, and associated values. It's better than
 stringifying the object the way Perl does, anyway.
 
-One other very important tip: for those columns where your database uses an
-auto-incremented value, add the C<< is_auto_increment => 1, >> option to the
-relevant hash in add_columns(). This will let the application know you don't
-need to supply a value for new or updated records. The interface will look
-much better as a result.
+=head2 Columns with auto-increment data types
 
-Finally, buried within one of the modules in this application are some
-filters, which are applied to data of certain types as it enters or leaves the
-database. If you find a particular data type is not being rendered correctly,
-please drop the author a line at the email address below, explaining what
-you'd like to see instead.
+For those columns where your database uses an auto-incremented value, add the
+C<< is_auto_increment => 1, >> option to the relevant hash in add_columns().
+This will let the application know you don't need to supply a value for new or
+updated records. The interface will look much better as a result.
 
-=head2 Download and install ExtJS
+=head2 Database IO filters
 
-You'll need to download the ExtJS Javascript Library (version 2.2+
-recommended), from this web page:
-L<http://extjs.com/products/extjs/download.php>.
+Buried within one of the modules in this application are some filters which
+are applied to data of certain types as it enters or leaves the database. If
+you find a particular data type is not being rendered correctly, please drop
+the author a line at the email address below, explaining what you'd like to
+see instead.
 
-Install it to your web server in a location that it is able to serve as static
-content. Make a note of the path used in a URL to retrieve this content, as it
-will be needed in the application configuration file, below.
-
-=head2 Application configuration file
-
-Create the application configuration file, an example of which is below:
-
- extjs2   /javascript/extjs-2
- <Model::LFB::DBIC>
-     schema_class   My::Database::Schema
-     connect_info   dbi:Pg:dbname=mydbname;host=mydbhost.example.com;
-     connect_info   username
-     connect_info   password
-     <connect_info>
-         AutoCommit   1
-     </connect_info>
- </Model::LFB::DBIC>
-
-The C<Model::LFB::DBIC> section must look (and be named) exactly like that
-above, except you should of course change the C<schema_class> value and the
-values within C<connect_info>.
-
-The application needs to know where your copy of ExtJS is, on the web server.
-Use the C<extjs2> option as shown above to specify the URL path to the
-libraries. This will be used in the templates in some way like this:
-
- <script type="text/javascript" src="[% c.extjs2 %]/ext-all.js" />
-
-=head3 Relocating LFB to another URL path
+=head2 Relocating LFB to another URL path
 
 If you want to use this application as a plugin with another Catalyst system,
 it should work fine, but you probably want to serve pages under a different
@@ -247,37 +368,6 @@ In the above example, the path C<...E<sol>adminE<sol>> will contain the LFB
 application, and all generated links in LFB will also make use of that path.
 Remember this is added to the C<base> of your Cataylst application which,
 depending on your web server configuration, might also have a leading path.
-
-=head2 Catalyst application
-
-The final step is to write a very small file which allows this module to
-bootstrap a Catalyst application around your database. Locate on your web
-server the area where Perl content is executed, and create a file as below:
-
- package ListFrameworkUser;
- use Catalyst qw(ConfigLoader +CatalystX::ListFramework::Builder);
- 
- __PACKAGE__->setup;
- 1;
-
-Let your web server know that this file is to be executed for any request
-which comes to its location.
-
-If necessary, you'll need to let the C<ConfigLoader> plugin know of the
-whereabouts of your application configuration file. See the
-L<Catalyst::Plugin::ConfigLoader> documentation for more details, although
-here is a brief example of the change required:
-
- __PACKAGE__->config( 'Plugin::ConfigLoader' => { file => 'myapp.conf' } );
- __PACKAGE__->setup;
-
-=head2 Accessing the application from your browser
-
-Presumably the location of the Catalyst application created in the previous
-section maps to a particular URL path. Follow this path with the name of a
-table in the database, and you should be presented with a table of data. If
-you omit the table name, then the application prompts you with a list of the
-available tables.
 
 =head1 EXAMPLES
 
@@ -299,6 +389,11 @@ simplifies the L<Catalyst> and L<DBIx::Class> code.
 If you have two columns which both have foreign key constraints to the same
 table, it's very likely LFB will not work. Again this is a simplification
 which speeded the initial development.
+
+=item Minor rendering issue in Safari
+
+One of the drop-down list boxes has its picker icon a bit wonky. If you are a
+CSS wizard, please take a look and send me a patch with a fix!
 
 =back
 
@@ -342,6 +437,10 @@ Class::C3
 
 =head1 SEE ALSO
 
+L<CatalystX::CRUD> and L<CatalystX::CRUD:YUI> are two distributions which
+allow you to create something similar but with full customization, and the
+ability to add more features. So, you trade effort for flexibility and power.
+
 L<CatalystX::ListFramework> is similar but has no dependency on Javascript
 (though it can use it for fancy auto-complete searches), and it also allows
 you to control which columns are rendered in the display.
@@ -368,17 +467,8 @@ LGPL 3.0 license (library version 289, 2008-06-12 21:08:08).
 
 The rest is Copyright (c) Oliver Gorwits 2008.
 
-This program is free software; you can redistribute it and/or modify it under
-the terms of version 2 of the GNU General Public License as published by the
-Free Software Foundation.
-
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc., 51 Franklin
-St, Fifth Floor, Boston, MA 02110-1301 USA
+This library is free software; you can redistribute it and/or modify it under
+the same terms as Perl itself.
 
 =cut
 

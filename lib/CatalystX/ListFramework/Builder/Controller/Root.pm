@@ -9,17 +9,26 @@ sub base : Chained PathPart('') CaptureArgs(0) {
     my ($self, $c) = @_;
 
     $c->stash->{current_view} = 'LFB::TT';
-    $c->stash->{version} = $CatalystX::ListFramework::Builder::VERSION;
-    # this is a no-op, for making relocateable apps
+    $c->stash->{version} = 'LFB v'
+        . $CatalystX::ListFramework::Builder::VERSION;
 }
 
-sub no_table : Chained('base') PathPart('') Args(0) {
+sub db_picker : Chained('base') PathPart('') Args(0) {
     my ($self, $c) = @_;
-    $c->forward('LFB::Metadata');
     $c->detach('err_message');
 }
 
-sub table : Chained('base') PathPart('') CaptureArgs(1) {
+sub db : Chained('base') PathPart('') CaptureArgs(1) {
+    my ($self, $c, $db) = @_;
+    $c->stash->{db} = $db;
+}
+
+sub no_table : Chained('db') PathPart('') Args(0) {
+    my ($self, $c) = @_;
+    $c->detach('err_message');
+}
+
+sub do_meta : Private {
     my ($self, $c, $table) = @_;
     $c->stash->{table} = $table;
 
@@ -27,18 +36,22 @@ sub table : Chained('base') PathPart('') CaptureArgs(1) {
     $c->detach('err_message') if !defined $c->stash->{lf}->{model};
 }
 
-sub main : Chained('table') PathPart('') Args(0) {
+sub main : Chained('db') PathPart('') Args(1) {
     my ($self, $c) = @_;
-
+    $c->forward('do_meta');
+    $c->stash->{title} = $c->stash->{lf}->{main}->{title} .' List';
     $c->stash->{template} = 'list.tt';
-    $c->stash->{title} = $c->stash->{lf}->{main}->{title}
-        .' List - powered by LFB v'. $c->stash->{version};
+}
+
+sub ajax : Chained('db') PathPart('') CaptureArgs(1) {
+    my ($self, $c) = @_;
+    $c->forward('do_meta');
 }
 
 sub err_message : Private {
     my ($self, $c) = @_;
+    $c->forward('LFB::Metadata') if !defined $c->stash->{lf}->{db2path};;
     $c->stash->{template} = 'tables.tt';
-    $c->stash->{title} = 'Powered by LFB v'. $c->stash->{version};
 }
 
 sub helloworld : Chained('base') Args(0) {

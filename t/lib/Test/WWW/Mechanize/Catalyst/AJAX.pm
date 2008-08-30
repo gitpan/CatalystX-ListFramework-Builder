@@ -11,6 +11,7 @@ sub ajax_ok {
     my $post = $self->post_ok( $path, $args, 'POST'. $message );
     my $ct = is( $self->ct, 'application/json', 'AJAX content type'. $message );
     my $response = JSON::from_json( $self->content );
+    shift @{ $response->{rows} } if $path =~ m#/list$#;
 
     if ($dump) {
         use Data::Dumper; # yeah, I know

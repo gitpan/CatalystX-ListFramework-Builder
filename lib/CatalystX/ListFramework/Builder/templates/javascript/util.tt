@@ -1,0 +1,43 @@
+    // toolkit for checkbox cols
+    var CheckTable = new Array();
+    [% FOREACH col IN lf.main.cols.keys %]
+      [% NEXT UNLESS lf.main.cols.$col.extjs_xtype == 'checkbox' %]
+      CheckTable['[% col %]'] = 1;
+    [% END %]
+    function isCheck (c) {
+        return !! CheckTable[c];
+    }
+
+    // toolkit for checking for foreign keys
+    var FKTable = new Array();
+    [% FOREACH col IN lf.main.cols.keys %]
+      [% NEXT UNLESS lf.main.cols.$col.is_fk OR lf.main.cols.$col.is_rr %]
+      FKTable['[% col %]'] = 1;
+    [% END %]
+    function isFK (c) {
+        return !! FKTable[c];
+    }
+
+    // drop down list box for jumping to another table in this schema
+    var combo = new Ext.form.ComboBox({
+        mode: 'local'
+        ,renderTo: 'picker'
+        ,triggerClass: 'picker-trigger'
+        ,readOnly: true
+        ,editable: false
+        ,forceSelection: true
+        ,lazyInit: false
+        ,emptyText: 'Select a table ...'
+        ,store: [
+          [% FOREACH table IN lf.table2path.keys.sort %]
+            [% ',' IF lf.table2path.keys.size > 1 AND NOT loop.first %]
+            ['[% c.uri_for( c.controller('LFB::Root').action_for('db_picker'), db, lf.table2path.item(table) ) %]', '[% table %]']
+          [% END %]
+        ]   
+        ,listeners: {
+            beforeselect: function(combo, record, index) {
+                window.location = record.data.value;
+                return false;
+            }   
+        }   
+    }); 

@@ -9,6 +9,7 @@ use File::stat;
 use File::Basename;
 
 my %mime = (
+    css => 'text/css',
     png => 'image/png',
     js  => 'application/x-javascript',
 );

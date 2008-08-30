@@ -11,7 +11,7 @@
 
     // create the Data Store
     var store = new Ext.data.JsonStore({
-        url: '[% c.uri_for( c.controller('LFB::Root').action_for('no_table'), lf.main.path, "list" ) %]'
+        url: '[% c.uri_for( c.controller('LFB::Root').action_for('db_picker'), db, lf.main.path, "list" ) %]'
         ,root: 'rows'
         ,fields: rowRecord
         ,remoteSort: true
@@ -28,54 +28,4 @@
         var limit = options.params.limit;
         options.params.page = Math.floor(start / limit) + 1;
         return true;
-    });
-
-    // toolkit for checkbox cols
-    var CheckTable = new Array();
-    [% FOREACH col IN lf.main.cols.keys %]
-      [% NEXT UNLESS lf.main.cols.$col.extjs_xtype == 'checkbox' %]
-      CheckTable['[% col %]'] = 1;
-    [% END %]
-    function isCheck (c) {
-        return !! CheckTable[c];
-    }
-
-    // toolkit for checking for foreign keys
-    var FKTable = new Array();
-    [% FOREACH col IN lf.main.cols.keys %]
-      [% NEXT UNLESS lf.main.cols.$col.is_fk %]
-      FKTable['[% col %]'] = 1;
-    [% END %]
-    function isFK (c) {
-        return !! FKTable[c];
-    }
-
-    // insert row for adding search filters
-    // need to fiddle the pager so it doesn't know about the extra row
-    store.on('load', function(store, records, options) {
-        // XXX uses private data to fiddle the page length
-        var numrecs = pagebar.store.data.length;
-        pagebar.disable();
-
-        // build search row based on previous search strings or defaults
-        var searchrow = {};
-        var params = store.baseParams;
-        var cols = cm.getColumnsBy(function (){ return true; });
-        for (var id in cols) {
-            var name = cols[id].dataIndex;
-            if (isFK(name)) {
-                continue;
-            }
-            if (params['search.' + name]) {
-                searchrow[name] = params['search.' + name];
-                continue;
-            }
-            searchrow[name] = '(click to add filter)';
-        }
-
-        store.insert(0, new rowRecord( searchrow ));
-
-        pagebar.store.data.length = numrecs;
-        pagebar.updateInfo();
-        pagebar.enable();
     });

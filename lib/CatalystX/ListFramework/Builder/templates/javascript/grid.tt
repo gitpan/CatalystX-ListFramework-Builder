@@ -1,251 +1,23 @@
-    [% PROCESS javascript/form.tt %]
+    [% PROCESS javascript/columns.tt %]
 
-    // the column model has information about grid columns
-    // dataIndex maps the column to the specific data field in
-    // the data store
-    var cm = new Ext.grid.ColumnModel([
-      [% FOREACH col IN lf.main.col_order %]
-        [% ',' IF lf.main.col_order.size > 1 AND NOT loop.first %]{
-          [% IF lf.main.cols.$col.is_fk %]
-            header:     '[% lf.main.cols.$col.heading %] (FK)'
-          [% ELSE %]
-            header:     '[% lf.main.cols.$col.heading %]'
-          [% END %]
-            ,dataIndex: '[% col %]'
-            ,editor:    new Ext.form.TextField({})
-            ,renderer: function (value,metadata,record,rowindex,colindex,store) {
-              [% IF lf.main.cols.$col.extjs_xtype == 'checkbox' %]
-                if (value == '(click to add filter)') { return '' }
-                if (value == '1') {
-                  return '<img src="[% c.uri_for( c.controller('LFB::Static').action_for('static'), "bullet_green.png" ) %]" />';
-                }
-                else {
-                  return '<img src="[% c.uri_for( c.controller('LFB::Static').action_for('static'), "bullet_red.png" ) %]" />';
-                }
-              [% ELSE %]
-                return value;
-              [% END %]
-            }
-        }
-      [% END %]
-      [% FOREACH col IN lf.main.mfks.keys %]
-        ,{
-            header: '[% lf.main.mfks.item(col) %]'
-            ,dataIndex: 'lf-multi-column'
-            ,align: 'center'
-            ,sortable: false
-            ,menuDisabled: true
-            ,tooltip: 'Hover mouse over a cell<br />to show related data'
-            ,renderer: function (value,metadata,record,rowindex,colindex,store) {
-                if (value == '(click to add filter)') { return '' }
-                else {
-                    metadata.css += 'half-grey';
-                    metadata.attr += 'ext:qtitle="[% lf.main.mfks.item(col) %]" ext:qtip="'
-                        + (record.get('[% col %]').join(',<br />') || '(none)') + '"';
-                    return '<img ext:qtitle="[% lf.main.mfks.item(col) %]" ext:qtip="'
-                        + (record.get('[% col %]').join(',<br />') || '(none)')
-                        + '" src="[% c.uri_for( c.controller('LFB::Static').action_for('static'), "magnifier.png" ) %]" />'
-                        + ' Show';
-                }
-            }
-        }
-      [% END %]
-        ,{
-            header: 'Delete'
-            ,width: 30
-            ,dataIndex: 'lf-delete-column'
-            ,align: 'left'
-            ,sortable: false
-            ,menuDisabled: true
-            ,renderer: function (value,metadata,record,rowindex,colindex,store) {
-                if (value == '(click to add filter)') { return '' }
-                else {
-                    metadata.attr += 'ext:qtitle="Delete" ext:qtip="'
-                        + ' [% lf.main.pk %](' + record.get('[% lf.main.pk %]') + ')"';
-                    return '<img ext:qtitle="Delete" ext:qtip="'
-                        + ' [% lf.main.pk %](' + record.get('[% lf.main.pk %]') + ')"'
-                        + ' src="[% c.uri_for( c.controller('LFB::Static').action_for('static'), "bin_closed.png" ) %]" />';
-                }
-            }
-        }
-    ]);
+    [% PROCESS javascript/toolbar.tt %]
 
-    // by default columns are sortable
-    cm.defaultSortable = true;
+    [% PROCESS javascript/pagebar.tt %]
 
-    var toolbar = new Ext.Toolbar({
-        id: 'toolbar'
-        ,items: [
-            {
-                text: 'Clear Filters'
-                ,cls: 'x-btn-text-icon'
-                ,icon: '[% c.uri_for( c.controller('LFB::Static').action_for('static'), "bin_closed.png" ) %]'
-                // XXX private method to refresh
-                ,handler: function (){
-                    store.baseParams = {}; // clear search opts
-                    pagebar.doLoad(pagebar.cursor);
-                }
-            }
-            ,' ' ,{
-                text: 'Apply Filters'
-                ,cls: 'x-btn-text-icon'
-                ,icon: '[% c.uri_for( c.controller('LFB::Static').action_for('static'), "find.png" ) %]'
-                ,handler: function (){
-                    var params = {};
-                    var searchrow = grid.getStore().getAt(0).data;
-                    for (var key in searchrow) {
-                        if ((searchrow[key].search('click to ') != -1)
-                            || (searchrow[key] === '')) {
-                            // don't submit if still the default, or empty
-                            continue;
-                        }
-                        params['search.' + key] = searchrow[key];
-                    }
-                    store.baseParams = params;
-                    pagebar.doLoad(pagebar.cursor);
-                }
-            }
-            ,'->' ,{
-                text: 'Add New [% lf.main.title %]'
-                ,cls: 'x-btn-text-icon'
-                ,icon: '[% c.uri_for( c.controller('LFB::Static').action_for('static'), "add.png" ) %]'
-                ,handler: function(){
-                    // draw the window!
-                    var win = generate_win();
-                    win.show(this);
-                }
-            }
-        ]
-    });
+    [% PROCESS javascript/gridview.tt %]
 
-    var pagebar = new Ext.PagingToolbar({
-        id: 'pagebar'
-        ,pageSize: 10
-        ,store: store
-        ,displayInfo: true
-        ,listeners: {
-            // fudge for the Rows selector below, when it selects 0 or 'all'
-            enable: function() {
-                if ((pagebar.pageSize === 0) || isNaN(pagebar.pageSize)) {
-                    pagebar.pageSize = pagebar.store.data.length;
-                    pagebar.updateInfo();
-                }
-            }
-        }
-        ,items: [
-            '-' ,'Rows:' ,' ' ,{
-                xtype: 'combo'
-                ,mode: 'local'
-                ,allowBlank: false
-                ,triggerAction: 'all'
-                ,lazyInit: false
-                ,width: 50
-                ,maskRe: /[0-9]/
-                ,store: [10, 20, 50, 100, 'all']
-                ,listeners: {
-                    render: function(combo) {
-                        combo.setValue(pagebar.pageSize);
-                    }
-                    ,select: function(combo) {
-                        pagebar.pageSize = parseInt(combo.getRawValue(), 10);
-                        pagebar.doLoad(pagebar.cursor);
-                    }
-                    ,specialkey: function(combo, e) {
-                        if (e.getKey() == 13) {
-                            pagebar.pageSize = parseInt(combo.getRawValue(), 10) || 'all';
-                            combo.setValue(pagebar.pageSize);
-                            pagebar.doLoad(pagebar.cursor);
-                        }
-                    }
-                }
-            }
-            ,'-' ,'Go to:' ,' ' ,{
-                xtype: 'combo'
-                ,mode: 'local'
-                ,readOnly: true
-                ,editable: false
-                ,forceSelection: true
-                ,lazyInit: false
-                ,emptyText: 'Select a table ...'
-                ,store: [
-                  [% FOREACH table IN lf.table2path.keys.sort %]
-                    [% ',' IF lf.table2path.keys.size > 1 AND NOT loop.first %]
-                    ['[% c.uri_for( c.controller('LFB::Root').action_for('no_table'), lf.table2path.item(table) ) %]', '[% table %]']
-                  [% END %]
-                ]
-                ,listeners: {
-                    beforeselect: function(combo, record, index) {
-                        window.location = record.data.value;
-                        return false;
-                    }
-                }
-            }
-        ]
-    });
-
-
-    // this override allows the grid panel to resize with more rows, then
-    // start scrolling as it exceeds the length of the viewport (browser win)
-    Ext.override(Ext.grid.GridView, {
-        layout : function(){
-            if(!this.mainBody){
-                return; // not rendered
-            }
-            var g = this.grid;
-            var c = g.getGridEl();
-            var csize = c.getSize(true);
-            var vw = csize.width;
-    
-            if(vw < 20 || csize.height < 20){ // display: none?
-                return;
-            }
-    
-            if(g.autoHeight){
-                var bb = Ext.select('div.x-grid3-body').first().getBottom();
-
-                if (bb > 20) {
-                    var vph = Ext.getCmp('vpid').getSize(true).height - 110;
-                    var hdHeight = this.mainHd.getHeight();
-                    var vh = vph - (hdHeight);
-
-                    if (bb > vph) {
-                        this.el.setSize(vw, vph);
-                    }
-                    else {
-                        vh = bb - 40;
-                        this.el.setSize(vw, vh);
-                    }
-                    this.scroller.setSize(vw, vh);
-                }
-            }else{
-                this.el.setSize(csize.width, csize.height);
-    
-                var hdHeight = this.mainHd.getHeight();
-                var vh = csize.height - (hdHeight);
-    
-                this.scroller.setSize(vw, vh);
-                if(this.innerHd){
-                    this.innerHd.style.width = (vw)+'px';
-                }
-            }
-            if(this.forceFit){
-                if(this.lastViewWidth != vw){
-                    this.fitColumns(false, false);
-                    this.lastViewWidth = vw;
-                }
-            }else {
-                this.autoExpand();
-                this.syncHeaderScroll();
-            }
-            this.onLayout(vw, vh);
-        }
-    });
+    // most of the work in the grid itself is making the filter row work
+    // we want clickable filter fields for cols which can be filtered
+    // and the clicks ignored on other fields, and the delete col field
+    // and pressing return after editing should not start edit on anything
+    // else.
 
     var grid = new Ext.grid.EditorGridPanel({
         id: 'search-grid'
+        ,renderTo: 'content'
         ,autoHeight: true
+        ,autoScroll: true
         ,stripeRows: true
-        ,title: '[% title %]'
         ,store: store
         ,loadMask: true
         ,colModel: cm
@@ -256,9 +28,7 @@
             ,forceFit: true
             //,scrollOffset: 0
             ,getRowClass: function (record, index) {
-                if (pagebar.disabled === true && index === 0) {
-                    return 'half-grey';
-                }
+                if (index === 0) { return 'half-grey' }
             }
         })
         ,listeners: {
@@ -289,7 +59,7 @@
                             if (btn == 'yes') {
                                 grid.loadMask.el.mask();
                                 Ext.Ajax.request({
-                                    url: '[% c.uri_for( c.controller('LFB::Root').action_for('no_table'), lf.main.path, "delete" ) %]'
+                                    url: '[% c.uri_for( c.controller('LFB::Root').action_for('db_picker'), db, lf.main.path, "delete" ) %]'
                                     ,params: {
                                         key: data
                                     }

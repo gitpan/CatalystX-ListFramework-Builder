@@ -49,31 +49,36 @@ $xtype_for{$_} = 'xdatetime' for (
 );
 
 sub process {
-    my ($self, $c, @parts) = @_;
+    my ($self, $c) = @_;
     my $lf = $c->stash->{lf} = {};
 
+    # set up databases list, even if only to display to user
+    _build_db_info($c, $lf);
+
+    # only one db anyway? pretend the user selected that
+    $c->stash->{db} = [keys %{$lf->{dbpath2model}}]->[0]
+        if scalar keys %{$lf->{dbpath2model}} == 1;
+
+    # no db specified, or unknown db
+    return if !defined $c->stash->{db}
+            or !exists $lf->{dbpath2model}->{ $c->stash->{db} };
+
+    $c->stash->{dbtitle} = _2title( $c->stash->{db} );
+
     # set up tables list, even if only to display to user
-    my $try_source = $c->model(_anydbmodel($c))->result_source;
-    foreach my $m ($try_source->schema->sources) {
-        $lf->{table2path}->{ _m2title($m) } = _m2path($m);
+    my $try_schema = $c->model( $lf->{dbpath2model}->{ $c->stash->{db} } )->schema;
+    foreach my $m ($try_schema->sources) {
+        my $t = $c->model($m)->result_source->from;
+        $lf->{table2path}->{ _2title($t) } = $t;
+        $lf->{path2model}->{$c->stash->{db}}->{$t} = $m;
     }
 
-    # no table specified
-    return if !scalar @parts;
+    # no table specified, or unknown table
+    return if !defined $c->stash->{table}
+        or !exists $lf->{path2model}->{ $c->stash->{db} }->{ $c->stash->{table} };
 
-    my $try_moniker = _qualify2moniker(@parts);
-    $lf->{model} = _moniker2model($c, $try_moniker);
-
-    # don't know the requested table
-    return if !defined $lf->{model};
-
-    # reset tables list and source, and continue
-    $lf->{table2path} = {};
-    my $source = $c->model($lf->{model})->result_source;
-
-    foreach my $m ($source->schema->sources) {
-        $lf->{table2path}->{ _m2title($m) } = _m2path($m);
-    }
+    $lf->{model}
+        = _model_for( $c, $lf->{path2model}->{ $c->stash->{db} }->{ $c->stash->{table} } );
 
     _build_table_info($c, $lf, $lf->{model}, 1);
 
@@ -81,6 +86,38 @@ sub process {
     #die Dumper $lf;
 
     return $self;
+}
+
+sub _build_db_info {
+    my ($c, $lf) = @_;
+    my %sources;
+
+    MODEL:
+    foreach my $m ($c->models) {
+        my $model = $c->model($m);
+        next unless eval { $model->isa('Catalyst::Model::DBIC::Schema') };
+        foreach my $s (keys %sources) {
+            if (eval { $model->isa($s) }) {
+                delete $sources{$s};
+            }
+            elsif (eval { $c->model($s)->isa($m) }) {
+                next MODEL;
+            }
+        }
+        $sources{$m} = 1;
+    }
+
+    foreach my $s (keys %sources) {
+        my $name = $c->model($s)->storage->dbh->{Name};
+
+        if ($name =~ m/\W/) {
+            # SQLite will return a file name as the "database name"
+            $name = lc [ reverse split '::', $s ]->[0];            
+        }
+
+        $lf->{db2path}->{_2title($name)} = $name;
+        $lf->{dbpath2model}->{$name} = $s;
+    }
 }
 
 sub _build_table_info {
@@ -93,10 +130,10 @@ sub _build_table_info {
     }
 
     my $source = $c->model($model)->result_source;
-    $ti->{title} = _m2title($model);
-    $ti->{table} = $source->from;
+    $ti->{table}   = $source->from;
+    $ti->{path}    = $ti->{table};
+    $ti->{title}   = _2title($ti->{table});
     $ti->{moniker} = $source->source_name;
-    $ti->{path} = _m2path($ti->{moniker});
     $lf->{tab_order}->{ $model } = $tab;
 
     # column and relation info for this table
@@ -151,12 +188,13 @@ sub _build_table_info {
     # extra data for foreign key columns
     foreach my $col (keys %fks, keys %sfks) {
 
-        $ti->{cols}->{$col}->{fk_model} =
-             _moniker2model($c, $source->related_source($col)->source_name);
+        $ti->{cols}->{$col}->{fk_model}
+            = _model_for( $c, $source->related_source($col)->source_name );
+        next if !defined $ti->{cols}->{$col}->{fk_model};
 
         # override the heading for this col to be the foreign table name
         $ti->{cols}->{$col}->{heading} =
-            _m2title( $ti->{cols}->{$col}->{fk_model} );
+            _2title( $c->model( $ti->{cols}->{$col}->{fk_model} )->result_source->from );
 
         # all gets a bit complex here, as there are a lot of cases to handle
 
@@ -191,49 +229,24 @@ sub _build_table_info {
     }
 }
 
-# turn table from user into a moniker
-sub _qualify2moniker {
-    return join '::', map { join '', map ucfirst, split /[\W_]+/, lc } @_;
-        # from DBIx::Class::Schema::Loader::Base::_table2moniker
-}
-
-# find the LFB::DBIC model for a given Result Source moniker
-sub _moniker2model {
+# find catalyst model which is serving this DBIC result source
+sub _model_for {
     my ($c, $moniker) = @_;
-    $moniker =~ s/_//g; # those not using ::Loader can have underscores
 
-    foreach my $orig ($c->models) {
-        (my $m = $orig) =~ s/_//g; # canonicalize
-        return $orig if $m =~ m/^(?:\w+::){0,}$moniker$/i;
+    foreach my $m ($c->models) {
+        my $model = $c->model($m);
+        my $test = eval { $model->result_source->source_name };
+        next if !defined $test;
+
+        return $m
+            if $model->result_source->source_name eq $moniker;
     }
     return undef;
-}
-
-# model or package name to url path
-sub _m2path {
-    return join '/', map lc, split '::', shift;
-}
-
-# model or package name to human title
-sub _m2title {
-    my $model = shift;
-    $model =~ s/_//g; # those not using ::Loader can have underscores
-
-    my @title = split '::', $model;
-    shift @title while $title[0] =~ m/^(?:LFB|DBIC)$/i; # drop Model namespace
-    s/(\w)([A-Z][a-z0-9])/$1 $2/g for @title; # reverse _table2moniker, ish
-    return join ' ', @title;
 }
 
 # col/table name to human title
 sub _2title {
     return join ' ', map ucfirst, split /[\W_]+/, lc shift;
-}
-
-# find any model which is (probably) one of our result classes
-sub _anydbmodel {
-    my $c = shift;
-    return first { $_ =~ m/^LFB::DBIC::/i } $c->models;
 }
 
 1;

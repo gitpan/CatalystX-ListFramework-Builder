@@ -1,16 +1,9 @@
-    // turn on validation errors beside the field globally
-    Ext.form.Field.prototype.msgTarget = 'side';
+    // we use the metadata loaded into the stash to create window tabs
+    // each tab is one table
+    // all tabs are in the same "form" wrt ajax submission
 
-    // BUG FIX for align of checkboxes in forms
-    // see: http://extjs.com/forum/showthread.php?t=37685
-    Ext.override(Ext.form.Checkbox, {
-        onResize : function(){
-            Ext.form.Checkbox.superclass.onResize.apply(this, arguments);
-            if (!this.boxLabel && !this.fieldLabel) {
-                this.el.alignTo(this.wrap, 'c-c');
-            }
-        }
-    }); 
+    // most of the messing about is to get the right form field types
+    // also readonly, validation
 
     var tabs = [
       [% FOREACH tname IN lf.tab_order.nsort %]
@@ -68,7 +61,7 @@
                     ,pageSize: 5
                     ,triggerAction: 'all'
                     ,store: new Ext.data.JsonStore({
-                        url: '[% c.uri_for( c.controller('LFB::Root').action_for('no_table'), info.path, "list_stringified" ) %]'
+                        url: '[% c.uri_for( c.controller('LFB::Root').action_for('db_picker'), db, info.path, "list_stringified" ) %]'
                         ,root: 'rows' ,totalProperty: 'total'
                         ,fields: [ 'dbid', 'stringified' ]
                         ,listeners: {
@@ -101,84 +94,3 @@
         }
       [% END %]
     ];
-
-    var generate_win = function() {
-        return new Ext.Window({
-            title: 'Edit [% lf.main.title %]'
-            ,id: 'main-win'
-            ,collapsible: true
-            ,closable: true
-            ,width: 400
-            ,modal: true
-            ,autoHeight: true
-            ,layout: 'fit'
-    
-            // form
-            ,items: [{
-                xtype: 'form'
-                ,id: 'form-panel'
-                ,border: false
-                ,url: '[% c.uri_for( c.controller('LFB::Root').action_for('no_table'), lf.main.path, "update" ) %]'
-                ,autoHeight: true
-                ,layout: 'fit'
-    
-                // tabpanel
-                ,items: [{
-                    xtype: 'tabpanel'
-                    ,activeTab: 0
-                    ,border: false
-                    ,deferredRender: false // submit all tabs
-                    ,autoHeight: true
-    
-                    // tab defaults
-                    ,defaults: {
-                        layout: 'form'
-                        ,bodyStyle: 'padding: 5px;'
-                        ,defaultType: 'textfield'
-                        ,buttonAlign: 'right'
-                        ,autoHeight: true
-                        ,hideMode: 'offsets'
-                        //,labelWidth: 80
-                        //,labelAlign: 'right'
-                    }
-    
-                    ,items: tabs
-                }]
-    
-                ,buttons: [{
-                    text: 'Save'
-                    ,handler: function(){
-                        Ext.getCmp('form-panel').getForm().submit({
-                            waitMsg: 'Saving Data...'
-                            ,clientValidation: false
-    
-                            ,success: function(){
-                                Ext.Msg.alert(
-                                    'Success', 'Changes have been saved.',
-                                    refreshandclose
-                                );
-                            }
-    
-                            ,failure: function(){
-                                Ext.Msg.alert(
-                                    'Error', 'Changes have not been saved!');
-                            }
-                        });
-                    }
-                },{
-                    text: 'Cancel',
-                    handler: function(){
-                        Ext.getCmp('main-win').close();
-                    }
-                }]
-            }]
-        });
-    };
-
-    var refreshandclose = function(btn,text){
-        if (btn == 'ok') {
-            // XXX using private parts of PagingToolbar
-            pagebar.doLoad( pagebar.cursor ); // reload
-            Ext.getCmp('main-win').close();
-        }
-    };

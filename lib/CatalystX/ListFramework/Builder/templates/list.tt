@@ -1,5 +1,3 @@
-<!-- TEMPLATE OK -->
-
 <script type="text/javascript">
 
 Ext.onReady(function(){
@@ -11,28 +9,30 @@ Ext.onReady(function(){
     Ext.apply(Ext.QuickTips.getQuickTip(), {
         showDelay: 0
         ,trackMouse: true
-        ,mouseOffset: [-10,20] // otherwise Delete tt overruns browser win
+        ,mouseOffset: [-60,20] // otherwise Delete tt overruns browser win
     });
+
+    // utility functions
+    [% PROCESS javascript/util.tt %]
 
     // create the Data Store
     [% PROCESS javascript/store.tt %]
 
+    // bring in the form for add/edit
+    [% PROCESS javascript/update.tt %]
+
     // set up the list grid
     [% PROCESS javascript/grid.tt %]
 
-    var vp = new Ext.Viewport({
-        layout: 'fit'
-        ,id: 'vpid'
-        ,items: grid
-    });
+    grid.render();
 
     // trigger the data store load
     // NB start is needed by store, but not by backend
     store.load({params:{start:0, limit:10, page:1}});
 
+    if (Ext.isIE) {
+        document.body.onresize = function(){return true};
+    }
 });
 
 </script>
-
-[% PROCESS style.tt %]
-[% PROCESS iefix.tt IF c.req.user_agent.match('\.NET CLR') %]

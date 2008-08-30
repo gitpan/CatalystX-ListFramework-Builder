@@ -20,13 +20,13 @@ for (qw( /foobar / )) {
     $mech->get_ok($_, "Get tables list page ($_)");
     is($mech->ct, 'text/html', "Tables list page content type ($_)");
     $mech->content_contains(
-        q{Please select a table by clicking one of the links below},
+        q{please select a table},
         "Tables list page content ($_)"
     );
 }
 
 $mech->content_contains(
-    qq{<li><a href="http://localhost//$_">} . ucfirst($_) . q{</a></li>},
+    qq{<a href="http://localhost//dbic/$_">},
     "Tables list page contains a link to $_ table"
 ) for qw( album artist copyright track );
 
@@ -35,11 +35,8 @@ $mech->links_ok( [$_], 'Check table link '. $_->url ) for @links;
 
 my $VERSION = $CatalystX::ListFramework::Builder::VERSION;
 foreach (qw( album artist copyright track )) {
-    $mech->get_ok("/$_", "Get listframework for $_ table");
-    $mech->title_is(ucfirst($_) ." List - powered by LFB v$VERSION", "Page title for $_");
-    $mech->content_contains('Ext.data.Record.create', "Storage tempate for $_");
-    $mech->content_contains('new Ext.Window', "Create/Update form tempate for $_");
-    $mech->content_contains('Ext.grid.ColumnModel', "Grid tempate for $_");
+    $mech->get_ok("/dbic/$_", "Get listframework for $_ table");
+    $mech->title_is(ucfirst($_) ." List - Powered by LFB v$VERSION", "Page title for $_");
 }
 
 #warn $mech->content;

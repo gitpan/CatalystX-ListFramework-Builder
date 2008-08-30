@@ -56,20 +56,20 @@ sub _sfy {
 }
 
 
-sub local_base : Chained('/lfb/root/table') PathPart('') CaptureArgs(0) {
+sub base : Chained('/lfb/root/ajax') PathPart('') CaptureArgs(0) {
     my ($self, $c) = @_;
     $c->stash->{current_view} = 'LFB::JSON';
 }
 
 sub end : ActionClass('RenderView') {}
 
-sub dumpmeta : Chained('local_base') Args(0) {
+sub dumpmeta : Chained('base') Args(0) {
     my ($self, $c) = @_;
     $c->stash->{json_data} = $c->stash->{lf};
     return $self;
 }
 
-sub list : Chained('local_base') Args(0) {
+sub list : Chained('base') Args(0) {
     my ($self, $c) = @_;
     my $lf = $c->stash->{lf};
     my $info = $lf->{main};
@@ -161,6 +161,28 @@ sub list : Chained('local_base') Args(0) {
         = $convert;
     # okay, you can look again.
 
+    # sneak in a 'top' row for applying the filters
+    my %searchrow = ();
+    foreach my $col (keys %{$info->{cols}}) {
+        my $ci = $info->{cols}->{$col};
+
+        if (exists $ci->{is_fk}
+            or exists $ci->{is_rr}
+            or (exists $ci->{extjs_xtype} and $ci->{extjs_xtype} eq 'checkbox')) {
+
+            $searchrow{$col} = '';
+        }
+        else {
+            if (exists $c->req->params->{ 'search.'. $col }) {
+                $searchrow{$col} = $c->req->params->{ 'search.'. $col };
+            }
+            else {
+                $searchrow{$col} = '(click to add filter)';
+            }
+        }
+    }
+    unshift @{$response->{rows}}, \%searchrow;
+
     return $self;
 }
 
@@ -168,7 +190,7 @@ sub list : Chained('local_base') Args(0) {
 # and then popping items off that stack, remembering the PK vals as we go,
 # for the benefit of later stack items (stack is built for this purpose).
 
-sub update : Chained('local_base') Args(0) {
+sub update : Chained('base') Args(0) {
     my ($self, $c) = @_;
     my $lf = $c->stash->{lf};
     my $response = $c->stash->{json_data} = {};
@@ -319,7 +341,7 @@ sub _process_row_stack {
     return 1;
 }
 
-sub delete : Chained('local_base') Args(0) {
+sub delete : Chained('base') Args(0) {
     my ($self, $c) = @_;
     my $lf = $c->stash->{lf};
     my $response = $c->stash->{json_data} = {};
@@ -338,7 +360,7 @@ sub delete : Chained('local_base') Args(0) {
     return $self;
 }
 
-sub list_stringified : Chained('local_base') Args(0) {
+sub list_stringified : Chained('base') Args(0) {
     my ($self, $c) = @_;
     my $lf = $c->stash->{lf};
     my $response = $c->stash->{json_data} = {};
