@@ -68,17 +68,17 @@ sub process {
     # set up tables list, even if only to display to user
     my $try_schema = $c->model( $lf->{dbpath2model}->{ $c->stash->{db} } )->schema;
     foreach my $m ($try_schema->sources) {
-        my $t = $c->model($m)->result_source->from;
+        my $model = _moniker2model($c, $m);
+        my $t = $c->model($model)->result_source->from;
         $lf->{table2path}->{ _2title($t) } = $t;
-        $lf->{path2model}->{$c->stash->{db}}->{$t} = $m;
+        $lf->{path2model}->{$c->stash->{db}}->{$t} = $model;
     }
 
     # no table specified, or unknown table
     return if !defined $c->stash->{table}
         or !exists $lf->{path2model}->{ $c->stash->{db} }->{ $c->stash->{table} };
 
-    $lf->{model}
-        = _model_for( $c, $lf->{path2model}->{ $c->stash->{db} }->{ $c->stash->{table} } );
+    $lf->{model} = $lf->{path2model}->{ $c->stash->{db} }->{ $c->stash->{table} };
 
     _build_table_info($c, $lf, $lf->{model}, 1);
 
@@ -189,7 +189,7 @@ sub _build_table_info {
     foreach my $col (keys %fks, keys %sfks) {
 
         $ti->{cols}->{$col}->{fk_model}
-            = _model_for( $c, $source->related_source($col)->source_name );
+            = _moniker2model( $c, $source->related_source($col)->source_name );
         next if !defined $ti->{cols}->{$col}->{fk_model};
 
         # override the heading for this col to be the foreign table name
@@ -230,16 +230,16 @@ sub _build_table_info {
 }
 
 # find catalyst model which is serving this DBIC result source
-sub _model_for {
+sub _moniker2model {
     my ($c, $moniker) = @_;
+    my $dbmodel = $c->stash->{lf}->{dbpath2model}->{ $c->stash->{db} };
 
     foreach my $m ($c->models) {
         my $model = $c->model($m);
         my $test = eval { $model->result_source->source_name };
         next if !defined $test;
 
-        return $m
-            if $model->result_source->source_name eq $moniker;
+        return $m if $test eq $moniker and $m =~ m/^${dbmodel}::/;
     }
     return undef;
 }

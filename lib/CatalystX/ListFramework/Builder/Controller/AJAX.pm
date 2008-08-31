@@ -51,7 +51,7 @@ sub _sfy {
         eval { $row->display_name }
         || (overload::Method($row, '""') ? $row.''
             : ( $row->result_source->source_name
-                .": ". join(', ', map { "$_(${\$row->$_})" } $row->primary_columns) ))
+                .": ". join(', ', map { "$_(${\$row->get_column($_)})" } $row->primary_columns) ))
     );
 }
 

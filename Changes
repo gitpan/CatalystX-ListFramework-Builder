@@ -1,3 +1,11 @@
+libcatalystx-listframework-builder (0.33) UNRELEASED; urgency=low
+
+  * Fix bug in use of $c->model with unqualified component names 
+  * Check for many_to_many in record stringification
+  * Update POD to more clearly show extjs is served from /static/ (thanks claco)
+
+ -- Oliver Gorwits <oliver.gorwits@oucs.ox.ac.uk>  Sun, 31 Aug 2008 16:43:33 +0100
+
 libcatalystx-listframework-builder (0.32) UNRELEASED; urgency=low
 
   * Cannot test autoloading until the new release of Schema::Loader is out 

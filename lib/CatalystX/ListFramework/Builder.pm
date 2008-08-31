@@ -6,7 +6,7 @@ use warnings FATAL => 'all';
 use Class::C3;
 use Devel::InnerPackage qw/list_packages/;
 
-our $VERSION = '0.32';
+our $VERSION = '0.33';
 $VERSION = eval $VERSION; # numify for warning-free dev releases
 
 sub setup_components {
@@ -39,7 +39,7 @@ sub setup_components {
                 $class->config->{$p}->{connect_info},
             );
 
-            eval qq{
+            eval q{
                 package LFB::Loader::Schema;
                 use base 'DBIx::Class::Schema';
                 LFB::Loader::Schema->load_classes();
@@ -95,7 +95,7 @@ DBIx::Class, using Catalyst
 
 =head1 VERSION
 
-This document refers to version 0.32 of CatalystX::ListFramework::Builder
+This document refers to version 0.33 of CatalystX::ListFramework::Builder
 
 =head1 WARNING
 
@@ -118,7 +118,7 @@ A configuration file somewhere on your system:
 
  # [listframeworkuser.conf] in Config::General format
  
- extjs2   /javascript/extjs-2
+ extjs2   /static/javascript/extjs-2
  
  <Model::LFB::DBIC>
      schema_class   My::Database::Schema
@@ -186,7 +186,7 @@ application, as above, causes it to scan your existing Models. If any of them
 are built using L<Catalyst::Model::DBIC::Schema>, they are automatically
 loaded. You still need to provide a small amount of configuration:
 
- extjs2   /javascript/extjs-2
+ extjs2   /static/javascript/extjs-2
  <Controller::LFB::Root>
      <action>
          <base>
@@ -225,7 +225,7 @@ application file looks the same as in Scenario 1, though:
 For the configuration, you need to tell LFB which package contains the
 C<DBIx::Class> schema, and also provide database connection parameters.
 
- extjs2   /javascript/extjs-2
+ extjs2   /static/javascript/extjs-2
  <Model::LFB::DBIC>
      schema_class   My::Database::Schema
      connect_info   dbi:Pg:dbname=mydbname;host=mydbhost.example.com;
@@ -282,7 +282,7 @@ existing one from disk).
  __PACKAGE__->setup;
  1;
 
- extjs2   /javascript/extjs-2
+ extjs2   /static/javascript/extjs-2
  <Model::LFB::DBIC>
      connect_info   dbi:Pg:dbname=mydbname;host=mydbhost.example.com;
      connect_info   username

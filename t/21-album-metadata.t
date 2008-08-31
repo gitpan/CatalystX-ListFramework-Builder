@@ -205,11 +205,11 @@ my $expected = {
     },
     'path2model' => {
         'dbic' => {
-            'sleeve_notes' => 'SleeveNotes',
-            'artist'       => 'Artist',
-            'album'        => 'Album',
-            'track'        => 'Track',
-            'copyright'    => 'Copyright'
+            'sleeve_notes' => 'LFB::DBIC::SleeveNotes',
+            'artist'       => 'LFB::DBIC::Artist',
+            'album'        => 'LFB::DBIC::Album',
+            'track'        => 'LFB::DBIC::Track',
+            'copyright'    => 'LFB::DBIC::Copyright'
         }
     },
     'db2path'      => { 'Dbic' => 'dbic' },
