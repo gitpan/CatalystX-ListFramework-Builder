@@ -1,3 +1,10 @@
+libcatalystx-listframework-builder (0.34) UNRELEASED; urgency=low
+
+  * Fix RT #38993 - AJAX::_sfy not handling undefined $row values 
+  * Fix RT #38990 - Don't pass undef (or anything) for auto-increment columns
+
+ -- Oliver Gorwits <oliver.gorwits@oucs.ox.ac.uk>  Thu,  4 Sep 2008 17:58:08 +0100
+
 libcatalystx-listframework-builder (0.33) UNRELEASED; urgency=low
 
   * Fix bug in use of $c->model with unqualified component names 

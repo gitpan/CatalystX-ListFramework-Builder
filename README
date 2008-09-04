@@ -3,7 +3,7 @@ NAME
     DBIx::Class, using Catalyst
 
 VERSION
-    This document refers to version 0.32 of
+    This document refers to version 0.34 of
     CatalystX::ListFramework::Builder
 
 WARNING
@@ -25,7 +25,7 @@ SYNOPSIS
 
      # [listframeworkuser.conf] in Config::General format
  
-     extjs2   /javascript/extjs-2
+     extjs2   /static/javascript/extjs-2
  
      <Model::LFB::DBIC>
          schema_class   My::Database::Schema
@@ -91,7 +91,7 @@ USAGE
     automatically loaded. You still need to provide a small amount of
     configuration:
 
-     extjs2   /javascript/extjs-2
+     extjs2   /static/javascript/extjs-2
      <Controller::LFB::Root>
          <action>
              <base>
@@ -131,7 +131,7 @@ USAGE
     For the configuration, you need to tell LFB which package contains the
     "DBIx::Class" schema, and also provide database connection parameters.
 
-     extjs2   /javascript/extjs-2
+     extjs2   /static/javascript/extjs-2
      <Model::LFB::DBIC>
          schema_class   My::Database::Schema
          connect_info   dbi:Pg:dbname=mydbname;host=mydbhost.example.com;
@@ -190,7 +190,7 @@ USAGE
      __PACKAGE__->setup;
      1;
 
-     extjs2   /javascript/extjs-2
+     extjs2   /static/javascript/extjs-2
      <Model::LFB::DBIC>
          connect_info   dbi:Pg:dbname=mydbname;host=mydbhost.example.com;
          connect_info   username

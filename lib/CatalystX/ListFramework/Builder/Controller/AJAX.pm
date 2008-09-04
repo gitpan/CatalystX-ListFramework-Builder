@@ -47,6 +47,7 @@ my %filter_for = (
 
 sub _sfy {
     my $row = shift;
+    return '' if !defined $row or !blessed $row;
     return (
         eval { $row->display_name }
         || (overload::Method($row, '""') ? $row.''
@@ -266,7 +267,9 @@ sub _build_table_data {
         }
         else {
         # not a foreign key, so just update the row data
-            if (exists $params->{ $prefix . $col }) {
+            if (exists $params->{ $prefix . $col }
+                and ($ci->{editable} or $params->{ $prefix . $col })) {
+                    # skip auto-inc cols unless they contain data
 
                 # filter data before sending to the database
                 if (exists $ci->{extjs_xtype}

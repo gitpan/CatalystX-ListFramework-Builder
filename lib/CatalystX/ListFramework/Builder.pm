@@ -6,7 +6,7 @@ use warnings FATAL => 'all';
 use Class::C3;
 use Devel::InnerPackage qw/list_packages/;
 
-our $VERSION = '0.33';
+our $VERSION = '0.34';
 $VERSION = eval $VERSION; # numify for warning-free dev releases
 
 sub setup_components {
@@ -95,7 +95,7 @@ DBIx::Class, using Catalyst
 
 =head1 VERSION
 
-This document refers to version 0.33 of CatalystX::ListFramework::Builder
+This document refers to version 0.34 of CatalystX::ListFramework::Builder
 
 =head1 WARNING
 
