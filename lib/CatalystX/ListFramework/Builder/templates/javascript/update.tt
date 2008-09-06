@@ -21,6 +21,6 @@
         }
     };
 
-    [% PROCESS javascript/update_tabs.tt %]
+    [% PROCESS javascript/update/tabs.tt %]
 
-    [% PROCESS javascript/update_window.tt %]
+    [% PROCESS javascript/update/window.tt %]

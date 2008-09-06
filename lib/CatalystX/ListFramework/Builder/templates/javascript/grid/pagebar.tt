@@ -17,15 +17,18 @@
                 ,store: [10, 20, 50, 100, 'all']
                 ,listeners: {
                     render: function(combo) {
-                        combo.setValue(pagebar.pageSize);
+                        var pgsz = Ext.state.Manager.get('lfb-pgsz', pagebar.pageSize);
+                        combo.setValue( isNaN(pgsz) ? 'all' : pgsz );
                     }
                     ,select: function(combo) {
                         pagebar.pageSize = parseInt(combo.getRawValue(), 10);
+                        Ext.state.Manager.set('lfb-pgsz', pagebar.pageSize);
                         pagebar.doLoad(pagebar.cursor);
                     }
                     ,specialkey: function(combo, e) {
                         if (e.getKey() == 13) {
                             pagebar.pageSize = parseInt(combo.getRawValue(), 10) || 'all';
+                            Ext.state.Manager.set('lfb-pgsz', pagebar.pageSize);
                             combo.setValue(pagebar.pageSize);
                             pagebar.doLoad(pagebar.cursor);
                         }
@@ -56,10 +59,12 @@
         // make the "Page x of y" work when we choose to show all rows
         ,getPageData : function(){
             var total = this.store.getTotalCount();
+            var pgsz = Ext.state.Manager.get('lfb-pgsz', pagebar.pageSize);
+            if (isNaN(pgsz)) { pgsz = total }
             return {
-                total : total,
-                activePage : Math.ceil((this.cursor+this.pageSize)/this.pageSize) || 1,
-                pages :  total < this.pageSize ? 1 : Math.ceil(total/this.pageSize) || 1
+                total : total
+                ,activePage : Math.ceil((this.cursor + pgsz) / pgsz)
+                ,pages :  total < pgsz ? 1 : Math.ceil(total / pgsz)
             };
         }
     });

@@ -24,8 +24,9 @@
     // hook to add page num param
     // got this from the extjs forums
     store.on('beforeload', function(store, options) {
-        var start = options.params.start;
+        options.params.limit = Ext.state.Manager.get('lfb-pgsz', pagebar.pageSize);
         var limit = options.params.limit;
+        var start = options.params.start;
         options.params.page = Math.floor(start / limit) + 1;
         return true;
     });

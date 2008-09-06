@@ -1,3 +1,11 @@
+libcatalystx-listframework-builder (0.35) UNRELEASED; urgency=low
+
+  * Add ExtJS Cookie support - stores grid attributes such as col order and
+    page size on per-table basis (thanks to Laust for the feature heads-up)
+  * Move some of the templates around in the filesystem
+
+ -- Oliver Gorwits <oliver.gorwits@oucs.ox.ac.uk>  Sat,  6 Sep 2008 23:43:35 +0100
+
 libcatalystx-listframework-builder (0.34) UNRELEASED; urgency=low
 
   * Fix RT #38993 - AJAX::_sfy not handling undefined $row values 
