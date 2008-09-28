@@ -6,7 +6,7 @@ use warnings FATAL => 'all';
 use Class::C3;
 use Devel::InnerPackage qw/list_packages/;
 
-our $VERSION = '0.35';
+our $VERSION = '0.36';
 $VERSION = eval $VERSION; # numify for warning-free dev releases
 
 sub setup_components {
@@ -31,7 +31,7 @@ sub setup_components {
         # on the fly schema engineering
         if (!exists $class->config->{$p}->{schema_class}) {
             require DBIx::Class::Schema::Loader;
-            die "Must have DBIx::Class::Schema::Loader version greater than 0.04005"
+            die "Must have DBIx::Class::Schema::Loader version > 0.04005"
                 if eval "$DBIx::Class::Schema::Loader::VERSION" <= 0.04005;
 
             DBIx::Class::Schema::Loader::make_schema_at(
@@ -95,7 +95,7 @@ DBIx::Class, using Catalyst
 
 =head1 VERSION
 
-This document refers to version 0.35 of CatalystX::ListFramework::Builder
+This document refers to version 0.36 of CatalystX::ListFramework::Builder
 
 =head1 WARNING
 
@@ -371,8 +371,34 @@ depending on your web server configuration, might also have a leading path.
 
 =head1 EXAMPLES
 
-There is an C<examples> directory included with this distribution which
-includes the files necessary to set up a small demo application with SQLite3.
+The code examples give above in this manual are also supplied in the form of a
+sample application. You'll find the application itself in the C<examples/app/>
+directory of this distribution, and the SQLite3 data source in the
+C<examples/sql/> directory.
+
+=head1 INSTANT DEMO APPLICATION
+
+If you want to run an instant demo of this module, with minimal configuration,
+then a simple application for that is shipped with this distribution. For this
+to work, you must have the very latest version of
+L<DBIx::Class::Schema::Loader> installed on your system (> 0.04005).
+
+First go to the C<examples/demo/> directory of this distribution and edit
+C<demo.conf> so that it contains the correct C<dsn>, username, and password
+for your database. Next, download a copy of the ExtJS 2.x Javascript library,
+and make a note of where you put it. Then create the following directory, and
+symbolic link:
+
+ demo> mkdir -p root/static
+ demo> ln -s /path/to/your/extjs-2 root/static/extjs-2
+
+Now start the demo application like so:
+
+ demo> perl ./server.pl
+
+Although the instruction at the end of the output says to visit (something
+like) C<http://localhost:3000>, you I<must> instead visit
+C<http://localhost:3000/lfb/> (i.e. add C</lfb/> to the end).
 
 =head1 LIMITATIONS
 
@@ -389,11 +415,6 @@ simplifies the L<Catalyst> and L<DBIx::Class> code.
 If you have two columns which both have foreign key constraints to the same
 table, it's very likely LFB will not work. Again this is a simplification
 which speeded the initial development.
-
-=item Minor rendering issue in Safari
-
-One of the drop-down list boxes has its picker icon a bit wonky. If you are a
-CSS wizard, please take a look and send me a patch with a fix!
 
 =back
 

@@ -26,7 +26,6 @@ my $expected = {
             'pk'        => 'id',
             'moniker'   => 'SleeveNotes',
             'col_order' => [ 'id', 'text', 'album_id' ],
-            'table'     => 'sleeve_notes',
             'path'      => 'sleeve_notes',
             'title'     => 'Sleeve Notes',
             'cols'      => {
@@ -56,7 +55,6 @@ my $expected = {
             'pk'      => 'id',
             'moniker' => 'Artist',
             'col_order' => [ 'id', 'forename', 'surname', 'pseudonym', 'born' ],
-            'table' => 'artist',
             'path'  => 'artist',
             'title' => 'Artist',
             'cols'  => {
@@ -97,7 +95,6 @@ my $expected = {
                 'id',        'title', 'recorded', 'deleted',
                 'artist_id', 'sleeve_notes'
             ],
-            'table' => 'album',
             'path'  => 'album',
             'title' => 'Album',
             'cols'  => {
@@ -160,7 +157,6 @@ my $expected = {
         'moniker' => 'Album',
         'col_order' =>
           [ 'id', 'title', 'recorded', 'deleted', 'artist_id', 'sleeve_notes' ],
-        'table' => 'album',
         'path'  => 'album',
         'title' => 'Album',
         'cols'  => {

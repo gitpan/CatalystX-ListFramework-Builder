@@ -15,7 +15,7 @@
               title: 'New [% info.title %]'
               ,xtype: 'fieldset'
               ,checkboxToggle: true
-              ,checkboxName: 'checkbox.[% info.table %]'
+              ,checkboxName: 'checkbox.[% info.path %]'
               ,collapsed: true
             [% END %]
 
@@ -29,8 +29,8 @@
                     name: '[% field %]'
                     ,id: '[% field %]'
                   [% ELSE %]
-                    name: '[% info.table %].[% field %]'
-                    ,id: '[% info.table %].[% field %]'
+                    name: '[% info.path %].[% field %]'
+                    ,id: '[% info.path %].[% field %]'
                   [% END %]
 
                     ,fieldLabel: '[% info.cols.$field.heading %]'

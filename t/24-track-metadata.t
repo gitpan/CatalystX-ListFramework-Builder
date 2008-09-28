@@ -29,7 +29,6 @@ my $expected = {
                 'id',          'title',    'length', 'sales',
                 'releasedate', 'album_id', 'copyright_id'
             ],
-            'table' => 'track',
             'path'  => 'track',
             'title' => 'Track',
             'cols'  => {
@@ -84,7 +83,6 @@ my $expected = {
             'pk'      => 'id',
             'moniker' => 'Copyright',
             'col_order' => [ 'id', 'rights_owner', 'copyright_year' ],
-            'table'     => 'copyright',
             'path'      => 'copyright',
             'title'     => 'Copyright',
             'cols'      => {
@@ -115,7 +113,6 @@ my $expected = {
                 'id',        'title', 'recorded', 'deleted',
                 'artist_id', 'sleeve_notes'
             ],
-            'table' => 'album',
             'path'  => 'album',
             'title' => 'Album',
             'cols'  => {
@@ -179,7 +176,6 @@ my $expected = {
             'id',          'title',    'length', 'sales',
             'releasedate', 'album_id', 'copyright_id'
         ],
-        'table' => 'track',
         'path'  => 'track',
         'title' => 'Track',
         'cols'  => {

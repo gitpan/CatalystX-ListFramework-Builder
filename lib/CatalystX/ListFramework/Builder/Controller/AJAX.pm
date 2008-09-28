@@ -140,7 +140,13 @@ sub list : Chained('base') Args(0) {
             }
         }
         foreach my $m (keys %{ $info->{mfks} }) {
-            $data->{$m} = [ map { _sfy($_) } $row->$m->all ];
+            if (exists $info->{m2m}->{$m}) {
+                my $target = $info->{m2m}->{$m};
+                $data->{$m} = [ map { _sfy($_) } map {$_->$target} $row->$m->all ];
+            }
+            else {
+                $data->{$m} = [ map { _sfy($_) } $row->$m->all ];
+            }
         }
         push @{$response->{rows}}, $data;
     }
@@ -221,7 +227,7 @@ sub _build_table_data {
     my $params = $c->req->params;
 
     my $info = $lf->{table_info}->{$model};
-    my $prefix = ($model eq $lf->{model} ? '' : "$info->{table}.");
+    my $prefix = ($model eq $lf->{model} ? '' : "$info->{path}.");
     my @related = ();
     my $data = {};
 
@@ -235,7 +241,7 @@ sub _build_table_data {
         if (exists $ci->{fk_model}) {
             if (exists $lf->{table_info}->{ $ci->{fk_model} }) {
             # FKs where we could have full row data for the FT
-                my $ft = $lf->{table_info}->{ $ci->{fk_model} }->{table};
+                my $ft = $lf->{table_info}->{ $ci->{fk_model} }->{path};
 
                 # has the user submitted a new row in the related table?
                 if (exists $params->{ 'checkbox.' . $ft }) {

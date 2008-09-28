@@ -5,7 +5,6 @@ use warnings FATAL => 'all';
 
 use base 'Catalyst::Component';
 
-use List::Util qw(first);
 use Scalar::Util qw(weaken);
 
 my %xtype_for = (
@@ -69,9 +68,10 @@ sub process {
     my $try_schema = $c->model( $lf->{dbpath2model}->{ $c->stash->{db} } )->schema;
     foreach my $m ($try_schema->sources) {
         my $model = _moniker2model($c, $m);
-        my $t = $c->model($model)->result_source->from;
-        $lf->{table2path}->{ _2title($t) } = $t;
-        $lf->{path2model}->{$c->stash->{db}}->{$t} = $model;
+        my $p = _rs2path($c->model($model)->result_source);
+
+        $lf->{table2path}->{ _2title($p) } = $p;
+        $lf->{path2model}->{$c->stash->{db}}->{ $p } = $model;
     }
 
     # no table specified, or unknown table
@@ -130,9 +130,8 @@ sub _build_table_info {
     }
 
     my $source = $c->model($model)->result_source;
-    $ti->{table}   = $source->from;
-    $ti->{path}    = $ti->{table};
-    $ti->{title}   = _2title($ti->{table});
+    $ti->{path}    = _rs2path($source);
+    $ti->{title}   = _2title($ti->{path});
     $ti->{moniker} = $source->source_name;
     $lf->{tab_order}->{ $model } = $tab;
 
@@ -155,9 +154,21 @@ sub _build_table_info {
     }
 
     # mas_many cols
+    # make friendly human readable title for related tables
     foreach my $t (keys %mfks) {
-        # make friendly human readable title for related table
-        $ti->{mfks}->{$t} = _2title($t);
+        my $target = _ism2m($source, $t);
+        if ($target) {
+            my $target_source
+                = $source->related_source($t)->related_source($target)->source_name;
+            eval "use Lingua::EN::Inflect::Number";
+            $target_source = Lingua::EN::Inflect::Number::to_PL($target_source)
+                if not $@;
+            $ti->{mfks}->{$t} = _2title( $target_source );
+            $ti->{m2m}->{$t} = $target;
+        }
+        else {
+            $ti->{mfks}->{$t} = _2title( $t );
+        }
     }
 
     $ti->{pk} = ($source->primary_columns)[0];
@@ -194,7 +205,7 @@ sub _build_table_info {
 
         # override the heading for this col to be the foreign table name
         $ti->{cols}->{$col}->{heading} =
-            _2title( $c->model( $ti->{cols}->{$col}->{fk_model} )->result_source->from );
+            _2title( _rs2path( $c->model( $ti->{cols}->{$col}->{fk_model} )->result_source ));
 
         # all gets a bit complex here, as there are a lot of cases to handle
 
@@ -227,6 +238,44 @@ sub _build_table_info {
             }
         }
     }
+}
+
+# is this col really part of a many to many?
+# test checks for related source having two belongs_to rels *only*,
+# and one of them refers to ourselves, and at most one other col (id pk)
+sub _ism2m {
+    my ($source, $rel) = @_;
+
+    my $fsource = $source->related_source($rel);
+    my @frels = $fsource->relationships;
+    return 0 if scalar @frels != 2 or scalar $fsource->columns > 3;
+
+    my $reverse_rel_okay = 0;
+    my $target;
+
+    foreach my $frel (@frels) {
+        return 0
+            if $fsource->relationship_info($frel)->{attrs}->{accessor} ne 'filter';
+
+        if ($fsource->related_source($frel)->source_name eq $source->source_name) {
+            $reverse_rel_okay = 1;
+        }
+        else {
+            $target = $frel;
+        }
+    }
+    return 0 if not $reverse_rel_okay;
+    return $target;
+}
+
+# find best table name
+sub _rs2path {
+    my $rs = shift;
+    return $rs->from if $rs->from =~ m/^\w+$/;
+
+    my $name = $rs->source_name;
+    $name =~ s/(\w)([A-Z][a-z0-9])/$1_$2/g;
+    return lc $name;
 }
 
 # find catalyst model which is serving this DBIC result source

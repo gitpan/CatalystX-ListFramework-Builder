@@ -1,4 +1,4 @@
-package TestAppLoader;
+package TestAppM2M;
 
 use strict;
 use warnings FATAL => 'all';
@@ -13,7 +13,7 @@ use Catalyst qw(ConfigLoader +CatalystX::ListFramework::Builder);
 
 my $dbfile = File::Temp->new( UNLINK => 1, EXLOCK => 0);
 my $dbh = DBI->connect("dbi:SQLite:dbname=$dbfile",'','');
-open my $sql_fh, 't/lib/test_app.sql' or die "Can't read SQL file: $!";
+open my $sql_fh, 't/lib/test_app_m2m.sql' or die "Can't read SQL file: $!";
 {
     local $/ = '';  # empty line(s) are delimeters
     while (<$sql_fh>) {
@@ -29,6 +29,7 @@ __PACKAGE__->__dbfile($dbfile);
 __PACKAGE__->config(
     extjs2 => '/javascript/extjs-2',
     'Model::LFB::DBIC' => {
+        schema_class => 'TestApp::M2MSchema',
         connect_info => ["dbi:SQLite:dbname=$dbfile", '', ''],
     },
 );

@@ -3,7 +3,7 @@ NAME
     DBIx::Class, using Catalyst
 
 VERSION
-    This document refers to version 0.35 of
+    This document refers to version 0.36 of
     CatalystX::ListFramework::Builder
 
 WARNING
@@ -278,9 +278,33 @@ TIPS AND TRICKS
     leading path.
 
 EXAMPLES
-    There is an "examples" directory included with this distribution which
-    includes the files necessary to set up a small demo application with
-    SQLite3.
+    The code examples give above in this manual are also supplied in the
+    form of a sample application. You'll find the application itself in the
+    "examples/app/" directory of this distribution, and the SQLite3 data
+    source in the "examples/sql/" directory.
+
+INSTANT DEMO APPLICATION
+    If you want to run an instant demo of this module, with minimal
+    configuration, then a simple application for that is shipped with this
+    distribution. For this to work, you must have the very latest version of
+    DBIx::Class::Schema::Loader installed on your system (> 0.04005).
+
+    First go to the "examples/demo/" directory of this distribution and edit
+    "demo.conf" so that it contains the correct "dsn", username, and
+    password for your database. Next, download a copy of the ExtJS 2.x
+    Javascript library, and make a note of where you put it. Then create the
+    following directory, and symbolic link:
+
+     demo> mkdir -p root/static
+     demo> ln -s /path/to/your/extjs-2 root/static/extjs-2
+
+    Now start the demo application like so:
+
+     demo> perl ./server.pl
+
+    Although the instruction at the end of the output says to visit
+    (something like) "http://localhost:3000", you *must* instead visit
+    "http://localhost:3000/lfb/" (i.e. add "/lfb/" to the end).
 
 LIMITATIONS
     Single column primary key
@@ -293,11 +317,6 @@ LIMITATIONS
         If you have two columns which both have foreign key constraints to
         the same table, it's very likely LFB will not work. Again this is a
         simplification which speeded the initial development.
-
-    Minor rendering issue in Safari
-        One of the drop-down list boxes has its picker icon a bit wonky. If
-        you are a CSS wizard, please take a look and send me a patch with a
-        fix!
 
     For the issues above, if you're desperate that the feature be
     implemented soon, please drop me a line at the address below, because

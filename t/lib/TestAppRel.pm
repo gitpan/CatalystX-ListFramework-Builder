@@ -13,7 +13,7 @@ use Catalyst qw(ConfigLoader +CatalystX::ListFramework::Builder);
 
 my $dbfile = File::Temp->new( UNLINK => 1, EXLOCK => 0);
 my $dbh = DBI->connect("dbi:SQLite:dbname=$dbfile",'','');
-open my $sql_fh, 't/test_app.sql' or die "Can't read SQL file: $!";
+open my $sql_fh, 't/lib/test_app.sql' or die "Can't read SQL file: $!";
 {
     local $/ = '';  # empty line(s) are delimeters
     while (<$sql_fh>) {

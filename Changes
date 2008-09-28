@@ -1,3 +1,13 @@
+libcatalystx-listframework-builder (0.36) UNRELEASED; urgency=low
+
+  * Switch table Go to: picker to be plain HTML+JS rather than ExtJS because
+    it wasn't rendering properly
+  * "Table name" is either ->from or Source Class name
+  * Support for many_to_many rels - the target table's data is displayed
+  * Bundled a customized demo server application for instant play-time
+
+ -- Oliver Gorwits <oliver.gorwits@oucs.ox.ac.uk>  Thu, 11 Sep 2008 23:19:41 +0100
+
 libcatalystx-listframework-builder (0.35) UNRELEASED; urgency=low
 
   * Add ExtJS Cookie support - stores grid attributes such as col order and

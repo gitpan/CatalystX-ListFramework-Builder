@@ -119,7 +119,7 @@
                         [% NEXT UNLESS lf.table_info.$table.cols.$col.is_fk
                                 AND NOT lf.table_info.$table.cols.$col.editable %]
                           [% ',' IF count > 1 %]
-                            '[% lf.table_info.$table.table %].[% col %]': rec.data['[% lf.main.pk %]']
+                            '[% lf.table_info.$table.path %].[% col %]': rec.data['[% lf.main.pk %]']
                           [% SET count = count + 1 %]
                         [% END %]
                       [% END %]
