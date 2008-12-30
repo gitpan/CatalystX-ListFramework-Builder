@@ -1,3 +1,9 @@
+libcatalystx-listframework-builder (0.37) UNRELEASED; urgency=low
+
+  * Fix for bug reported when adding new rows (RT#41974) 
+
+ -- Oliver Gorwits <oliver.gorwits@oucs.ox.ac.uk>  Tue, 30 Dec 2008 23:08:08 +0000
+
 libcatalystx-listframework-builder (0.36) UNRELEASED; urgency=low
 
   * Switch table Go to: picker to be plain HTML+JS rather than ExtJS because
