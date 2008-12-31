@@ -5,7 +5,7 @@ use warnings FATAL => 'all';
 
 use base 'Catalyst::View::TT';
 use File::Basename;
-use Class::C3;
+use MRO::Compat;
 
 # the templates are squirreled away in ../templates
 (my $pkg_path = __PACKAGE__) =~ s{::}{/}g;

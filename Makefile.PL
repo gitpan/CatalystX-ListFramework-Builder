@@ -9,7 +9,7 @@ requires       'Catalyst::Model::DBIC::Schema' => 0;
 requires       'Catalyst::View::JSON' => 0;
 requires       'Catalyst::View::TT' => 0;
 requires       'Catalyst::Action::RenderView' => 0;
-requires       'Class::C3' => 0;
+requires       'MRO::Compat' => 0;
 
 test_requires  'Test::More' => 0;
 test_requires  'Test::WWW::Mechanize' => '1.16';

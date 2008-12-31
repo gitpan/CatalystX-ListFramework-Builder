@@ -24,8 +24,8 @@ requires:
   Catalyst::Runtime: 5.70
   Catalyst::View::JSON: 0
   Catalyst::View::TT: 0
-  Class::C3: 0
+  MRO::Compat: 0
   perl: 5.8.1
 resources:
   license: http://dev.perl.org/licenses/
-version: 0.37
+version: 0.38

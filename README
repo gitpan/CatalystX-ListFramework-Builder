@@ -3,7 +3,7 @@ NAME
     DBIx::Class, using Catalyst
 
 VERSION
-    This document refers to version 0.37 of
+    This document refers to version 0.38 of
     CatalystX::ListFramework::Builder
 
 WARNING
@@ -336,7 +336,7 @@ REQUIREMENTS
 
     *   Catalyst::Action::RenderView
 
-    *   Class::C3
+    *   MRO::Compat
 
 SEE ALSO
     CatalystX::CRUD and CatalystX::CRUD:YUI are two distributions which

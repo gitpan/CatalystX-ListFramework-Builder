@@ -3,10 +3,10 @@ package CatalystX::ListFramework::Builder;
 use strict;
 use warnings FATAL => 'all';
 
-use Class::C3;
+use MRO::Compat;
 use Devel::InnerPackage qw/list_packages/;
 
-our $VERSION = '0.37';
+our $VERSION = '0.38';
 $VERSION = eval $VERSION; # numify for warning-free dev releases
 
 sub setup_components {
@@ -95,7 +95,7 @@ DBIx::Class, using Catalyst
 
 =head1 VERSION
 
-This document refers to version 0.37 of CatalystX::ListFramework::Builder
+This document refers to version 0.38 of CatalystX::ListFramework::Builder
 
 =head1 WARNING
 
@@ -452,7 +452,7 @@ Catalyst::Action::RenderView
 
 =item *
 
-Class::C3
+MRO::Compat
 
 =back
 

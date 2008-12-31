@@ -1,3 +1,9 @@
+libcatalystx-listframework-builder (0.38) UNRELEASED; urgency=low
+
+  * Switch from Class::C3 to MRO::Compat for new Perl/Catalyst (reported by Laust)
+
+ -- Oliver Gorwits <oliver.gorwits@oucs.ox.ac.uk>  Wed, 31 Dec 2008 14:44:02 +0000
+
 libcatalystx-listframework-builder (0.37) UNRELEASED; urgency=low
 
   * Fix for bug reported when adding new rows (RT#41974) 
