@@ -3,7 +3,7 @@ NAME
     DBIx::Class, using Catalyst
 
 VERSION
-    This document refers to version 0.38 of
+    This document refers to version 0.39 of
     CatalystX::ListFramework::Builder
 
 WARNING
@@ -24,10 +24,10 @@ SYNOPSIS
     A configuration file somewhere on your system:
 
      # [listframeworkuser.conf] in Config::General format
- 
-     extjs2   /static/javascript/extjs-2
- 
-     <Model::LFB::DBIC>
+     
+ extjs2   /static/javascript/extjs-2
+     
+ <Model::LFB::DBIC>
          schema_class   My::Database::Schema
          connect_info   dbi:Pg:dbname=mydbname;host=mydbhost.example.com;
          connect_info   username
@@ -41,8 +41,8 @@ SYNOPSIS
 
      package ListFrameworkUser;
      use Catalyst qw(ConfigLoader +CatalystX::ListFramework::Builder);
- 
-     __PACKAGE__->setup;
+     
+ __PACKAGE__->setup;
      1;
 
     Now going to the CGI area's URL will display a list of the tables in
@@ -81,8 +81,8 @@ USAGE
 
      package ListFrameworkUser;
      use Catalyst qw(ConfigLoader +CatalystX::ListFramework::Builder);
- 
-     __PACKAGE__->setup;
+     
+ __PACKAGE__->setup;
      1;
 
     Adding "CatalystX::ListFramework::Builder" (LFB) as a plugin to your
@@ -124,8 +124,8 @@ USAGE
 
      package ListFrameworkUser;
      use Catalyst qw(ConfigLoader +CatalystX::ListFramework::Builder);
- 
-     __PACKAGE__->setup;
+     
+ __PACKAGE__->setup;
      1;
 
     For the configuration, you need to tell LFB which package contains the
@@ -186,8 +186,8 @@ USAGE
 
      package ListFrameworkUser;
      use Catalyst qw(ConfigLoader +CatalystX::ListFramework::Builder);
- 
-     __PACKAGE__->setup;
+     
+ __PACKAGE__->setup;
      1;
 
      extjs2   /static/javascript/extjs-2

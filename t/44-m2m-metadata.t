@@ -108,7 +108,13 @@ my $expected = {
     }
 };
 
-is_deeply( $response, $expected, 'Metadata is as we expect' );
+SKIP: {
+        eval { require Lingua::EN::Inflect::Number };
+
+        skip "Lingua::EN::Inflect::Number not installed", 1 if $@;
+
+    is_deeply( $response, $expected, 'Metadata is as we expect' );
+}
 
 #warn $mech->content;
 __END__
