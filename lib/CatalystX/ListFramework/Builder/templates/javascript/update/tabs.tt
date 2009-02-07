@@ -38,7 +38,7 @@
                     ,autoHeight: true
                   
                   [% IF info.cols.$field.default_value %]
-                    ,value: '[% info.cols.$field.default_value %]'
+                    ,value: '[% info.cols.$field.default_value | replace('\'', '\\\'') %]'
                   [% END %]
 
                   [% UNLESS info.cols.$field.editable %]

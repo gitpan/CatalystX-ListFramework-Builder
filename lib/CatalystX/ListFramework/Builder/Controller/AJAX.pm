@@ -39,8 +39,8 @@ my %filter_for = (
         },
         to_db   => sub {
             my $val = shift;
-            return 'true' if $val eq 'on' or $val eq '1';
-            return 'false';
+            return 1 if $val eq 'on' or $val eq '1';
+            return 0;
         },
     },
 );
@@ -286,7 +286,7 @@ sub _build_table_data {
                         );
                 }
 
-                $data->{$col} = $params->{ $prefix . $col } || undef;
+                $data->{$col} = $params->{$prefix . $col};
             }
         }
     }
