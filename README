@@ -1,17 +1,16 @@
 NAME
-    CatalystX::ListFramework::Builder - Instant AJAX web front-end for
-    DBIx::Class, using Catalyst
+    CatalystX::ListFramework::Builder - *** DEPRECATED *** please see
+    Catalyst::Plugin::AutoCRUD
 
 VERSION
-    This document refers to version 0.41 of
+    This document refers to version 0.42 of
     CatalystX::ListFramework::Builder
 
 WARNING
-    This is an *ALPHA RELEASE*. I'd really appreciate any bug reports; you
-    can use the CPAN RT bug tracking system, or email me (Oliver) directly
-    at the address at the bottom of this page. Please also be aware that the
-    configuration file content has changed from previous releases of the
-    module.
+    This module will work, but is no longer actively being developed. The
+    same author has created Catalyst::Plugin::AutoCRUD which should be
+    almost a drop-in replacement for you, and has even more yummy automagic
+    goodness.
 
 PURPOSE
     You have a database, and wish to have a basic web interface supporting

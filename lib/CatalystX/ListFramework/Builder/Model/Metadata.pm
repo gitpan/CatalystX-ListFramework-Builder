@@ -3,9 +3,11 @@ package CatalystX::ListFramework::Builder::Model::Metadata;
 use strict;
 use warnings FATAL => 'all';
 
-use base 'Catalyst::Component';
-
+use base 'Catalyst::Model';
 use Scalar::Util qw(weaken);
+use Carp;
+
+__PACKAGE__->mk_classdata(_lfb_cache => {});
 
 my %xtype_for = (
     boolean => 'checkbox',
@@ -51,6 +53,19 @@ sub process {
     my ($self, $c) = @_;
     my $lf = $c->stash->{lf} = {};
 
+    if (exists $c->stash->{db} and defined $c->stash->{db}
+        and exists $c->stash->{table} and defined $c->stash->{table}
+        and exists $self->_lfb_cache->{$c->stash->{db}}->{$c->stash->{table}}) {
+
+        # we have a cache!
+        $c->stash->{lf} = $self->_lfb_cache->{$c->stash->{db}}->{$c->stash->{table}};
+        $c->log->debug(sprintf 'retrieved cached metadata for db: [%s] table: [%s]',
+            $c->stash->{db}, $c->stash->{table}) if $c->debug;
+
+        weaken $c->stash->{lf};
+        return $self;
+    }
+
     # set up databases list, even if only to display to user
     _build_db_info($c, $lf);
 
@@ -67,7 +82,8 @@ sub process {
     # set up tables list, even if only to display to user
     my $try_schema = $c->model( $lf->{dbpath2model}->{ $c->stash->{db} } )->schema;
     foreach my $m ($try_schema->sources) {
-        my $model = _moniker2model($c, $m);
+        my $model = _moniker2model($c, $m)
+            or croak "unable to translate model [$m] into moniker, bailing out";
         my $p = _rs2path($c->model($model)->result_source);
 
         $lf->{table2path}->{ _2title($p) } = $p;
@@ -80,11 +96,14 @@ sub process {
 
     $lf->{model} = $lf->{path2model}->{ $c->stash->{db} }->{ $c->stash->{table} };
 
+    # build and store in cache
     _build_table_info($c, $lf, $lf->{model}, 1);
 
-    #use Data::Dumper;
-    #die Dumper $lf;
+    $self->_lfb_cache->{$c->stash->{db}}->{$c->stash->{table}} = $lf;
+    $c->log->debug(sprintf 'cached metadata for db: [%s] table: [%s]',
+        $c->stash->{db}, $c->stash->{table}) if $c->debug;
 
+    weaken $c->stash->{lf};
     return $self;
 }
 

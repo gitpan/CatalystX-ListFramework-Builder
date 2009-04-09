@@ -4,14 +4,14 @@
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
 <title>[% title %][% ' - Powered by ' IF title %][% version %]</title>
 
-<link rel="stylesheet" type="text/css" href="[% c.config.extjs2 %]/resources/css/ext-all.css" />
+<link rel="stylesheet" type="text/css" href="[% cpac.extjs2 %]/resources/css/ext-all.css" />
 <link rel="stylesheet" type="text/css" href="[% c.uri_for( c.controller('LFB::Static').action_for('static'), "lfb.css" ) %]" />
 [% IF c.req.user_agent.match('\.NET CLR') %]
 <link rel="stylesheet" type="text/css" href="[% c.uri_for( c.controller('LFB::Static').action_for('static'), "iefix.css" ) %]" />
 [% END %]
 
-<script type="text/javascript" src="[% c.config.extjs2 %]/adapter/ext/ext-base.js"></script>
-<script type="text/javascript" src="[% c.config.extjs2 %]/ext-all.js"></script>
+<script type="text/javascript" src="[% cpac.extjs2 %]/adapter/ext/ext-base.js"></script>
+<script type="text/javascript" src="[% cpac.extjs2 %]/ext-all.js"></script>
 
 <script type="text/javascript" src="[% c.uri_for( c.controller('LFB::Static').action_for('static'), "xdatetime.js" ) %]"></script>
 </head>

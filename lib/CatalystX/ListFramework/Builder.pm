@@ -6,7 +6,7 @@ use warnings FATAL => 'all';
 use MRO::Compat;
 use Devel::InnerPackage qw/list_packages/;
 
-our $VERSION = '0.41';
+our $VERSION = '0.42';
 $VERSION = eval $VERSION; # numify for warning-free dev releases
 
 sub setup_components {
@@ -40,7 +40,8 @@ sub setup_components {
             );
 
             eval q{
-                package LFB::Loader::Schema;
+                package # hide from pause
+                    LFB::Loader::Schema;
                 use base 'DBIx::Class::Schema';
                 LFB::Loader::Schema->load_classes();
                 1;
@@ -90,19 +91,17 @@ __END__
 
 =head1 NAME
 
-CatalystX::ListFramework::Builder - Instant AJAX web front-end for
-DBIx::Class, using Catalyst
+CatalystX::ListFramework::Builder - *** DEPRECATED *** please see Catalyst::Plugin::AutoCRUD
 
 =head1 VERSION
 
-This document refers to version 0.41 of CatalystX::ListFramework::Builder
+This document refers to version 0.42 of CatalystX::ListFramework::Builder
 
 =head1 WARNING
 
-This is an I<ALPHA RELEASE>. I'd really appreciate any bug reports; you can
-use the CPAN RT bug tracking system, or email me (Oliver) directly at the
-address at the bottom of this page. Please also be aware that the
-configuration file content has changed from previous releases of the module.
+This module will work, but is B<no longer actively being developed>. The same
+author has created L<Catalyst::Plugin::AutoCRUD> which should be almost a
+drop-in replacement for you, and has even more yummy automagic goodness.
 
 =head1 PURPOSE
 

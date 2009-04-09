@@ -1,5 +1,5 @@
 ---
-abstract: 'Instant AJAX web front-end for'
+abstract: '*** DEPRECATED *** please see Catalyst::Plugin::AutoCRUD'
 author:
   - 'Oliver Gorwits C<< <oliver.gorwits@oucs.ox.ac.uk> >>'
 build_requires:
@@ -28,4 +28,4 @@ requires:
   perl: 5.8.1
 resources:
   license: http://dev.perl.org/licenses/
-version: 0.41
+version: 0.42
